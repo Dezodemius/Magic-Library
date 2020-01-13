@@ -1,0 +1,66 @@
+GET /_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "author":   "Глуховский" }}
+      ]
+    }
+  }
+}
+
+POST books_index/_doc
+{
+  "id" : 2,
+  "author" : "Дмитрий Глуховский",
+  "name" : "Метро 2033"
+}
+
+POST books_index/_doc
+{
+  "id" : 3,
+  "author" : "Дмитрий Глуховский",
+  "name" : "Метро 2034"
+}
+POST books_index/_doc
+{
+  "id" : 4,
+  "author" : "Дмитрий Глуховский",
+  "name" : "Метро 2035"
+}
+POST books_index/_doc
+{
+  "id" : 5,
+  "author" : "Дмитрий Глуховский",
+  "name" : "Текст"
+}
+POST books_index/_doc
+{
+  "id" : 6,
+  "author" : "Дмитрий Глуховский",
+  "name" : "Сумерки"
+}
+POST books_index/_doc
+{
+  "id" : 7,
+  "author" : "Герберт Уэлс",
+  "name" : "Война миров"
+}
+POST books_index/_doc
+{
+  "id" : 8,
+  "author" : "Герберт Уэлс",
+  "name" : "Человек-невидимка"
+}
+POST books_index/_doc
+{
+  "id" : 9,
+  "author" : "Лев Толстой",
+  "name" : "Война и мир"
+}
+POST books_index/_doc
+{
+  "id" : 10,
+  "author" : "Олдос Хаксли",
+  "name" : "О дивный новый мир"
+}
