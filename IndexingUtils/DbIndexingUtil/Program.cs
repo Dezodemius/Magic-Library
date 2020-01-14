@@ -1,17 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DbIndexingUtil
 {
+    /// <summary>
+    /// Основной объект для работы программы.
+    /// </summary>
     public class Program
     {
+        private static readonly DbManufacturer dbManufacturer = new DbManufacturer();
+
+        /// <summary>
+        /// Стандартная точка входа в программу.
+        /// </summary>
+        /// <param name="args"></param>
         public static void Main(string[] args)
         {
-            DbManufacturer.ExtractFromDb();
+            dbManufacturer.ExtractFromDb();
 
+            Console.WriteLine("Press any key to exit. . .");
             Console.ReadKey();
         }
     }
