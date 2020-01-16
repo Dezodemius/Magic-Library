@@ -59,32 +59,34 @@ namespace DbIndexingUtil
         /// <summary>
         /// Извлечь данные их БД.
         /// </summary>
-        public void ExtractFromDb()
+        public List<Book> ExtractFromDb()
         {
+            var books = new List<Book>();
             try
             {
                 connection.Open();
                 command.CommandText = extractionCommand;
 
-                var reader = command.ExecuteReader();
-
-                var books = new List<Book>();
+                var reader = command.ExecuteReader();                
 
                 while (reader.Read())
                 {
                     books.Add(new Book()
                     {
                         Id = reader.GetInt32(0),
-                        Author = new Author(reader.GetString(1)),
+                        Author = reader.GetString(1),
                         Name = reader.GetString(2)
                     });
                 }
                 reader.Dispose();
+
             }
             catch (Exception e)
             {
                 Logger.Error(e);
             }
+
+            return books;
         }
 
         #endregion

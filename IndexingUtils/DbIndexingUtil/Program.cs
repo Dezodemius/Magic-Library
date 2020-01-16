@@ -15,10 +15,28 @@ namespace DbIndexingUtil
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
-            dbManufacturer.ExtractFromDb();
+            try
+            {
+                if (args.Length == 0)
+                {
+                    var books = dbManufacturer.ExtractFromDb();
+                    ElasticsearchProvider.SendDataToElasticsearch(books);
+                }
+                else
+                {
 
-            Console.WriteLine("Press any key to exit. . .");
-            Console.ReadKey();
+                }
+                             
+            }
+            catch (Exception e)
+            {             
+                Console.WriteLine("Utility completed with error.\n" + e);
+            }
+            finally
+            {
+                Console.WriteLine("Press any key to exit. . .");
+                Console.ReadKey();
+            }
         }
     }
 }
