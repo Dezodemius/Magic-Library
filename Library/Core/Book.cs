@@ -18,7 +18,7 @@
         /// <summary>
         /// Автор книги.
         /// </summary>
-        public Author Author { get; set; }
+        public string Author { get; set; }
 
         /// <summary>
         /// Дата добавления книги.
