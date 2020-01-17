@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 
-namespace DbIndexingUtil
+namespace Core
 {
     /// <summary>
     /// Провайдер для ES.
@@ -62,7 +62,7 @@ namespace DbIndexingUtil
         /// <param name="entities">Список сущностей.</param>
         public static List<Core.Book> Search(string searchRequest)
         {
-            using (var request = new HttpRequestMessage(new HttpMethod("POST"), "/books_index/_search"))
+            using (var request = new HttpRequestMessage(new HttpMethod("POST"), string.Format(pathMask, indexPath, search)))
             {
                 var searchContent = "{\"query\":{\"bool\":{\"must\":{\"query_string\":{\"query\":\"" + searchRequest + "\"}}}}}";
                 request.Content = new StringContent(searchContent);

@@ -1,4 +1,5 @@
 ﻿using System;
+using Core;
 
 namespace DbIndexingUtil
 {
@@ -12,24 +13,15 @@ namespace DbIndexingUtil
         /// <summary>
         /// Стандартная точка входа в программу.
         /// </summary>
-        /// <param name="args"></param>
-        public static void Main(string[] args)
+        public static void Main()
         {
             try
             {
-                if (args.Length == 0)
-                {
-                    var books = dbManufacturer.ExtractFromDb();
-                    ElasticsearchProvider.SendDataToElasticsearch(books);
-                }
-                else
-                {
-
-                }
-                             
+                var books = dbManufacturer.ExtractFromDb();
+                ElasticsearchProvider.SendDataToElasticsearch(books);
             }
             catch (Exception e)
-            {             
+            {
                 Console.WriteLine("Utility completed with error.\n" + e);
             }
             finally

@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{51250438-2327-4200-9C9E-F7FAB1F2499F}</ProjectGuid>
+    <ProjectGuid>{06A3BE15-527B-4F75-95CE-653ED44CF76C}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Library</RootNamespace>
     <AssemblyName>Library</AssemblyName>
@@ -48,6 +48,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj">
+      <Project>{b3cb9679-bf32-41a7-ae07-03530a883bbd}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
