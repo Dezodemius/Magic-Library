@@ -20,12 +20,12 @@
         /// </summary>
         public string FullName { get; }
 
-        public Author(string lastName, string firstName)
+        public Author(string fullName)
         {
-            LastName = lastName;
-            FirstName = firstName;
+            FullName = fullName;
 
-            FullName = $"{FirstName} {LastName}";
+            LastName = FullName.Split()[0];
+            FirstName = FullName.Split()[1];
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using Core;
+using NLog;
 using Npgsql;
 using Oracle.ManagedDataAccess.Client;
 using System;
@@ -24,7 +25,7 @@ namespace DbIndexingUtil
         /// <summary>
         /// Команда для извлечения.
         /// </summary>
-        private const string extractionCommand = "SELECT * FROM BOOKS";
+        private const string extractionCommand = "SELECT id, author, name FROM BOOKS";
 
         /// <summary>
         /// Имя провайдера подключения к Oracle БД.
@@ -58,26 +59,34 @@ namespace DbIndexingUtil
         /// <summary>
         /// Извлечь данные их БД.
         /// </summary>
-        public void ExtractFromDb()
+        public List<Book> ExtractFromDb()
         {
+            var books = new List<Book>();
             try
             {
                 connection.Open();
                 command.CommandText = extractionCommand;
 
-                var reader = command.ExecuteReader();
+                var reader = command.ExecuteReader();                
 
-                var books = new List<Book>();
-                
-                while (reader.Read())                
-                    Console.WriteLine($"{reader.GetInt32(0)}\t{reader.GetString(1)}\t{reader.GetString(2)}");
-                
+                while (reader.Read())
+                {
+                    books.Add(new Book()
+                    {
+                        Id = reader.GetInt32(0),
+                        Author = reader.GetString(1),
+                        Name = reader.GetString(2)
+                    });
+                }
                 reader.Dispose();
+
             }
             catch (Exception e)
             {
                 Logger.Error(e);
             }
+
+            return books;
         }
 
         #endregion
