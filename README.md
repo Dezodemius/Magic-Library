@@ -1,12 +1,12 @@
 # <p align="center"> Magic-Library
-* [Индексация](#indexing)
-* [Поиск](#search)
+* [Индексация](#Индексация)
+* [Поиск](#Поиск)
 ## Индексация
 
 Перед началом работы нужно отправить документы в индекс ES. Для этого нужно запустить утилиту инлексации документов из базы данных DbIndexingUtil из папки IndexingUtils, указав строку подключения и провайдера базы данных в файле конфигураций App.Config. Список доступных для работы провайдеров:
-  * OracleDb --- Oracle.ManagedDataAccess.Client.OracleClientFactory;
-  * MSSQL --- System.Data.SqlClient;
-  * PostgreSQL --- Npgsql.
+  * OracleDb - Oracle.ManagedDataAccess.Client.OracleClientFactory;
+  * MSSQL - System.Data.SqlClient;
+  * PostgreSQL - Npgsql.
   
 Для запуска нужно зайти в Microsoft Visual Studio и:
   * собрать проект и запустить через командную строку Windows исполняемый файл в папке bin/($Configuration);
