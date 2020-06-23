@@ -14,9 +14,8 @@ namespace Library
     public const string HelpMessage = @"
 Esc - Выход.
 S - Поиск.
-R - Сканировать книги.
-I - Что-то ещё, не помню.
-С - Сменить расположение папки с книгами.
-H - Справка";
+A - Добавить книгу в Elasticsearch.
+D - Добавить книги в Elasticsearch.
+W - Показать все книги в Elasticsearch";
   }
 }

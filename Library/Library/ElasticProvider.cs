@@ -1,6 +1,6 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using Library.Entity;
 using Nest;
 
@@ -59,11 +59,27 @@ namespace Library
     /// <param name="book">Экземпляр книги.</param>
     public void Index(Book book)
     {
-      var indexResponse = _client.Index(book, i => i.Index("books"));
-      if (!indexResponse.IsValid)
-        Console.WriteLine($"{book.Name} - не удалось индексировать.");
+      var indexResponse = _client.Index(book, i => i.Index(LibraryConstants.DefaultIndexName));
+      Console.WriteLine(indexResponse.ApiCall);
+      Console.WriteLine(!indexResponse.IsValid
+        ? $"{book.Name} - не удалось индексировать."
+        : $"{book.Name} - удалось индексировать.");
     }
 
+    /// <summary>
+    /// Индексировать несколько документов.
+    /// </summary>
+    /// <param name="books">Список книг.</param>
+    public void BulkIndex(IEnumerable<Book> books)
+    {
+      var bulkRequest = _client.Bulk(b => b.Index(LibraryConstants.DefaultIndexName).IndexMany(books));
+      if (bulkRequest.Errors)
+        foreach (var itemWithError in bulkRequest.ItemsWithErrors)
+          Console.WriteLine("Failed to index document {0}: {1}", itemWithError.Id, itemWithError.Error);
+      else
+        Console.WriteLine("Все книги проиндексированы.");
+    }
+    
     #endregion
 
     #region Конструкторы
@@ -85,10 +101,7 @@ namespace Library
       _client = new ElasticClient(setting);
       
       if (!_client.Indices.Exists(LibraryConstants.DefaultIndexName).Exists)
-      {
-        _client.Indices.Create(LibraryConstants.DefaultIndexName,
-          i => i.Map<ElasticBook>(m => m.AutoMap()));
-      }
+        _client.Indices.Create(LibraryConstants.DefaultIndexName, i => i.Map<ElasticBook>(m => m.AutoMap()));
     }
     
     #endregion
