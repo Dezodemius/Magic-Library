@@ -2,6 +2,7 @@
 using System.Text;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
+using Library.Entity;
 
 namespace Library
 {
@@ -11,21 +12,23 @@ namespace Library
   public static class TextLayerExtractor
   {
     /// <summary>
-    /// Извлечь текстовый слой из PDF-документа.
+    /// Извлечь PDF-документ в объект Book.
     /// </summary>
-    /// <param name="fileName">Имя файла.</param>
+    /// <param name="pdfPath">Имя файла.</param>
     /// <returns>Текстовый слой.</returns>
-    public static string ExtractFromPdf(string fileName)
+    public static Book FromPdfToBook(string pdfPath)
     {
-      using var pdfReader = new PdfReader(fileName);
+      using var pdfReader = new PdfReader(pdfPath);
       
       var text = new StringBuilder();
       var strategy = new SimpleTextExtractionStrategy();
 
       for (var i = 1; i < pdfReader.NumberOfPages; i++)
-        text.Append(PdfTextExtractor.GetTextFromPage(pdfReader, i, strategy));
+        text.Append(PdfTextExtractor.GetTextFromPage(pdfReader, i, new LocationTextExtractionStrategy()));
 
-      return text.ToString();
+      Console.WriteLine("Не удалось определить автора книги. Введите название книги: ");
+      var name = Console.ReadLine();
+      return new Book(name, text.ToString());
     }
   }
 }
