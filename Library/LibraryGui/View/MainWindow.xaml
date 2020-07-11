@@ -1,18 +1,17 @@
-﻿<Window x:Class="LibraryGui.MainWindow"
+﻿<UserControl x:Class="LibraryGui.View.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:LibraryGui"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <StackPanel Orientation="Vertical">
-        <TextBox x:Name="SearchBox" Margin="5"/>
+        xmlns:viewModel="clr-namespace:LibraryGui.ViewModel"
+        mc:Ignorable="d"  d:DataContext="{d:DesignInstance viewModel:MainWindowViewModel}">
+    <StackPanel Orientation="Vertical" >
+        <TextBox Text="{Binding SearchPhrase, Mode=OneWayToSource}" Margin="5"/>
         <StackPanel Orientation="Horizontal" Margin="5" Width="Auto">
-            <Button Margin="5 0 0 0">Поиск</Button>
-            <Button Margin="5 0 0 0">Добавить книгу</Button>
-            <Button Margin="5 0 0 0">Получить все книги</Button>
+            <Button Margin="5 0 0 0" Command="{Binding SearchCommand}">Поиск</Button>
+            <Button Margin="5 0 0 0" Command="{Binding AddBookCommand}">Добавить книгу</Button>
+            <Button Margin="5 0 0 0" Command="{Binding GetAllBooksCommand}">Получить все книги</Button>
         </StackPanel>
-        <ListView MinHeight="300" Margin="5 0 0 5"></ListView>
+        <ListView MinHeight="300" Margin="5 0 0 5" ItemsSource="{Binding Path=FoundedBooks}"></ListView>
     </StackPanel>
-</Window>
+</UserControl>

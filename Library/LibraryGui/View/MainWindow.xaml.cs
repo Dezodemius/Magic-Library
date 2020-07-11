@@ -1,4 +1,4 @@
-﻿namespace LibraryGui
+﻿namespace LibraryGui.View
 {
   /// <summary>
   /// Interaction logic for MainWindow.xaml

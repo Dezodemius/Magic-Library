@@ -34,6 +34,12 @@
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
     <ItemGroup>
+        <Reference Include="Elasticsearch.Net, Version=7.0.0.0, Culture=neutral, PublicKeyToken=96c599bbe3e70f5d">
+          <HintPath>..\..\..\..\.nuget\packages\elasticsearch.net\7.7.1\lib\net461\Elasticsearch.Net.dll</HintPath>
+        </Reference>
+        <Reference Include="Nest, Version=7.0.0.0, Culture=neutral, PublicKeyToken=96c599bbe3e70f5d">
+          <HintPath>..\..\..\..\.nuget\packages\nest\7.7.1\lib\net461\Nest.dll</HintPath>
+        </Reference>
         <Reference Include="System" />
         <Reference Include="System.Core" />
         <Reference Include="System.Data" />
@@ -50,17 +56,17 @@
             <Generator>MSBuild:Compile</Generator>
             <SubType>Designer</SubType>
         </ApplicationDefinition>
-        <Page Include="MainWindow.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
+        <Compile Include="Utils\DelegateCommand.cs" />
+        <Compile Include="Utils\ViewService.cs" />
+        <Compile Include="ViewModel\MainWindowViewModel.cs" />
         <Compile Include="App.xaml.cs">
             <DependentUpon>App.xaml</DependentUpon>
             <SubType>Code</SubType>
         </Compile>
-        <Compile Include="MainWindow.xaml.cs">
-            <DependentUpon>MainWindow.xaml</DependentUpon>
-            <SubType>Code</SubType>
+        <Compile Include="ViewModel\ViewModel.cs" />
+        <Compile Include="View\MainWindow.xaml.cs">
+          <DependentUpon>MainWindow.xaml</DependentUpon>
+          <SubType>Code</SubType>
         </Compile>
     </ItemGroup>
     <ItemGroup>
@@ -82,9 +88,18 @@
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Model" />
-      <Folder Include="Utils" />
-      <Folder Include="View" />
-      <Folder Include="ViewModel" />
+    </ItemGroup>
+    <ItemGroup>
+      <Page Include="View\MainWindow.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <SubType>Designer</SubType>
+      </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Library\Library.csproj">
+        <Project>{30bd3a9f-dae6-4bbb-8652-8c48ae6d1fdd}</Project>
+        <Name>Library</Name>
+      </ProjectReference>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

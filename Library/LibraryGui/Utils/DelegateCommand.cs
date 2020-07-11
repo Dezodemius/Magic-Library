@@ -13,12 +13,12 @@ namespace LibraryGui.Utils
     /// <summary>
     /// Действие команды.
     /// </summary>
-    public Action<object> ExecuteAction { get; private set; }
+    private Action<object> ExecuteAction { get; }
 
     /// <summary>
     /// Обработчик возможности выполнения команды.
     /// </summary>
-    public Func<object, bool> CanExecuteFunction { get; private set; }
+    private Func<object, bool> CanExecuteFunction { get; }
 
     #endregion
 
@@ -29,8 +29,8 @@ namespace LibraryGui.Utils
     /// </summary>
     public event EventHandler CanExecuteChanged
     {
-      add { CommandManager.RequerySuggested += value; }
-      remove { CommandManager.RequerySuggested -= value; }
+      add => CommandManager.RequerySuggested += value;
+      remove => CommandManager.RequerySuggested -= value;
     }
 
     #endregion
