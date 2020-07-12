@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.IO;
 using System.Text;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
@@ -24,10 +24,10 @@ namespace Library
       var strategy = new SimpleTextExtractionStrategy();
 
       for (var i = 1; i < pdfReader.NumberOfPages; i++)
-        text.Append(PdfTextExtractor.GetTextFromPage(pdfReader, i, new LocationTextExtractionStrategy()));
-
-      Console.WriteLine("Не удалось определить автора книги. Введите название книги: ");
-      var name = Console.ReadLine();
+        text.Append(PdfTextExtractor.GetTextFromPage(pdfReader, i, strategy));
+      
+      var name = new FileInfo(pdfPath).Name;
+      
       return new Book(name, text.ToString());
     }
   }
