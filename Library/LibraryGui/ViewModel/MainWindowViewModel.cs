@@ -1,8 +1,11 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using Library;
+using Library.Entity;
 using LibraryGui.Utils;
+using Microsoft.Win32;
 
 namespace LibraryGui.ViewModel
 {
@@ -10,10 +13,12 @@ namespace LibraryGui.ViewModel
   {
     public override string Name { get; } = "Главное окно";
     
-    public static ObservableCollection<string> FoundedBooks { get; set; } = new ObservableCollection<string>();
+    public static ObservableCollection<Book> FoundedBooks { get; set; } = new ObservableCollection<Book>();
     
     public static string SearchPhrase { get; set; }
 
+    private static readonly Lazy<ElasticProvider> ElasticProvider = new Lazy<ElasticProvider>();
+    
     private DelegateCommand _searchCommand;
     
     public DelegateCommand SearchCommand =>
@@ -26,8 +31,7 @@ namespace LibraryGui.ViewModel
 
     private static void Search(object obj)
     {
-      var esProvider = new ElasticProvider();
-      var documents = esProvider.Search(SearchPhrase).Documents;
+      var documents = ElasticProvider.Value.Search(SearchPhrase).Documents;
       
       if (!documents.Any())
       {
@@ -36,7 +40,7 @@ namespace LibraryGui.ViewModel
       }
       
       foreach (var result in documents)
-        FoundedBooks.Add(result.Name);
+        FoundedBooks.Add(result);
     }
     
     private DelegateCommand _addBookCommand;
@@ -51,7 +55,9 @@ namespace LibraryGui.ViewModel
 
     private static void AddBook(object obj)
     {
-      
+      var openFileDialog = new OpenFileDialog();
+      if (openFileDialog.ShowDialog() == true)
+        ElasticProvider.Value.Index(TextLayerExtractor.FromPdfToBook(openFileDialog.FileName));
     }
     
     private DelegateCommand _getAllBooksCommand;
