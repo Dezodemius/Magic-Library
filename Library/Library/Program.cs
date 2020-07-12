@@ -94,14 +94,13 @@ namespace Library
     /// </summary>
     private static void BulkIndexing()
     {
-      var path = string.Empty;
       var booksForIndexing = new List<Book>();
       while (true)
       {
         try
         {
           Console.Write("Введите путь к книге: ");
-          path = Console.ReadLine();
+          var path = Console.ReadLine();
           if (string.IsNullOrEmpty(path))
             break;
           var fileInfo = new FileInfo(path);
