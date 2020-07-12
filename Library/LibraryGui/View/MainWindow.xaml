@@ -12,6 +12,12 @@
             <Button Margin="5 0 0 0" Command="{Binding AddBookCommand}">Добавить книгу</Button>
             <Button Margin="5 0 0 0" Command="{Binding GetAllBooksCommand}">Получить все книги</Button>
         </StackPanel>
-        <ListView MinHeight="300" Margin="5 0 0 5" ItemsSource="{Binding Path=FoundedBooks}"></ListView>
+        <ListView MinHeight="300" Margin="5 0 0 5" ItemsSource="{Binding Path=FoundedBooks}">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=Name}">Название</GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
     </StackPanel>
 </UserControl>
