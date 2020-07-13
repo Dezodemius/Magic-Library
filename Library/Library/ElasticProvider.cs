@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Library.Entity;
 using Nest;
@@ -17,7 +16,7 @@ namespace Library
     /// Экземпляр клиента Elasticsearch.
     /// </summary>
     private readonly ElasticClient _client;
-
+    
     #endregion
     
     #region Методы
