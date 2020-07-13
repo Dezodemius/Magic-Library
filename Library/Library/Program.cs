@@ -15,7 +15,7 @@ namespace Library
     /// Клиент Elasticsearch.
     /// </summary>
     private static ElasticProvider _esProvider;
-    
+
     /// <summary>
     /// Меню.
     /// </summary>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Library.Entity;
 using Nest;
+using NLog;
 
 namespace Library
 {
@@ -16,6 +17,11 @@ namespace Library
     /// Экземпляр клиента Elasticsearch.
     /// </summary>
     private readonly ElasticClient _client;
+
+    /// <summary>
+    /// Логгер класса.
+    /// </summary>
+    private static readonly Logger Log = LogManager.GetCurrentClassLogger();
     
     #endregion
     
@@ -59,8 +65,8 @@ namespace Library
     public void Index(Book book)
     {
       var indexResponse = _client.Index(book, i => i.Index(LibraryConstants.DefaultIndexName));
-      Console.WriteLine(indexResponse.ApiCall);
-      Console.WriteLine(!indexResponse.IsValid
+      Log.Debug(indexResponse.ApiCall);
+      Log.Debug(!indexResponse.IsValid
         ? $"{book.Name} - не удалось индексировать."
         : $"{book.Name} - удалось индексировать.");
     }
@@ -74,9 +80,21 @@ namespace Library
       var bulkRequest = _client.Bulk(b => b.Index(LibraryConstants.DefaultIndexName).IndexMany(books));
       if (bulkRequest.Errors)
         foreach (var itemWithError in bulkRequest.ItemsWithErrors)
-          Console.WriteLine("Failed to index document {0}: {1}", itemWithError.Id, itemWithError.Error);
+          Log.Debug("Failed to index document {0}: {1}", itemWithError.Id, itemWithError.Error);
       else
-        Console.WriteLine("Все книги проиндексированы.");
+        Log.Debug("Все книги проиндексированы.");
+    }
+
+    /// <summary>
+    /// Удалить книгу из индекса.
+    /// </summary>
+    /// <param name="book">Экземпляр книги.</param>
+    public void DeleteBook(Book book)
+    {
+      var response = _client.DeleteByQuery<Book>(q => q
+        .Query(rq => rq
+          .Term(f => f.Name, book.Name)));
+      Log.Debug(response);
     }
     
     #endregion
@@ -94,8 +112,7 @@ namespace Library
     /// <param name="elasticUrl">Адрес ES.</param>
     public ElasticProvider(Uri elasticUrl)
     {
-      var setting = new ConnectionSettings(elasticUrl)
-        .DefaultIndex(LibraryConstants.DefaultIndexName);
+      var setting = new ConnectionSettings(elasticUrl).DefaultIndex(LibraryConstants.DefaultIndexName);
       
       _client = new ElasticClient(setting);
       
