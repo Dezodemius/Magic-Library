@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Library.Entity;
 using Nest;
 using NLog;
-using NLog.Fluent;
 
 namespace Library.Utils
 {
@@ -33,12 +32,12 @@ namespace Library.Utils
     /// <summary>
     /// Экземпляр клиента Elasticsearch.
     /// </summary>
-    private ElasticClient Client { get; set; }
+    private ElasticClient Client { get; }
 
     /// <summary>
     /// Логгер класса.
     /// </summary>
-    private readonly Logger Log = LogManager.GetCurrentClassLogger();
+    private readonly Logger _log = LogManager.GetCurrentClassLogger();
 
     #endregion
     
@@ -53,7 +52,7 @@ namespace Library.Utils
       ISearchResponse<Book> response;
       try
       {
-        Log.Debug($"Searching: {searchPhrase} in index: {DefaultIndex}");
+        _log.Debug($"Searching: {searchPhrase} in index: {DefaultIndex}");
         response = Client.Search<Book>(s => s
           .Query(q => q
             .MultiMatch(c => c
@@ -62,7 +61,7 @@ namespace Library.Utils
       }
       catch (Exception e)
       {
-        Log.Error(e, e.StackTrace);
+        _log.Error(e, e.StackTrace);
         throw;
       }
 
@@ -72,10 +71,10 @@ namespace Library.Utils
     /// <summary>
     /// Найти все книги в индексе.
     /// </summary>
-    public IEnumerable<Book> SearchAll()
+    public IEnumerable<Book> GetAll()
     {
       var response = Client.Search<Book>(s => s.Query(q => q.MatchAll()));
-      Log.Debug($"Search all. Found {response.Documents.Count} documents.");
+      _log.Debug($"Search all. Found {response.Documents.Count} documents.");
       return response.Documents;
     }
 
@@ -86,7 +85,7 @@ namespace Library.Utils
     public string GetTemplate()
     {
       var template = Client.Indices.GetTemplate();
-      Log.Debug(template.ToString());
+      _log.Debug(template.ToString());
       return template.ToString();
     }
 
@@ -100,7 +99,7 @@ namespace Library.Utils
         .Index(book, i => i
           .Index(DefaultIndex));
       
-      Log.Debug($"{book.Name} is indexed: {indexResponse.IsValid}.");
+      _log.Debug($"{book.Name} is indexed: {indexResponse.IsValid}.");
     }
 
     /// <summary>
@@ -118,15 +117,39 @@ namespace Library.Utils
       {
         foreach (var itemWithError in bulkRequest.ItemsWithErrors)
         {
-          Log.Debug("Failed to index document {0}: {1}", itemWithError.Id, itemWithError.Error);
+          _log.Debug("Failed to index document {0}: {1}", itemWithError.Id, itemWithError.Error);
         }
       }
       else
       {
-        Log.Debug("Bulk Indexing. All books indexed.");
+        _log.Debug("Bulk Indexing. All books indexed.");
       }
     }
 
+    /// <summary>
+    /// Удалить несколько документов.
+    /// </summary>
+    /// <param name="books">Список книг.</param>
+    public void BulkDelete(IEnumerable<Book> books)
+    {
+      var bulkRequest = Client
+        .Bulk(b => b
+          .Index(DefaultIndex)
+          .DeleteMany(books));
+
+      if (bulkRequest.Errors)
+      {
+        foreach (var itemWithError in bulkRequest.ItemsWithErrors)
+        {
+          _log.Debug("Failed to delete document {0}: {1}", itemWithError.Id, itemWithError.Error);
+        }
+      }
+      else
+      {
+        _log.Debug("Bulk delete. All books deleted.");
+      }
+    }
+    
     /// <summary>
     /// Удалить книгу из индекса.
     /// </summary>
@@ -137,7 +160,7 @@ namespace Library.Utils
         .Query(rq => rq
           .Term(f => f.Id, book.Id)));
       
-      Log.Debug($"Book {book.Name} deleted: {response.IsValid}");
+      _log.Debug($"Book {book.Name} deleted: {response.IsValid}");
       return response.IsValid;
     }
 
@@ -149,7 +172,7 @@ namespace Library.Utils
     {
       var response = Client.Count<Book>();
 
-      Log.Debug($"Books count: {response.Count}");
+      _log.Debug($"Books count: {response.Count}");
       return (int)response.Count;
     }
     
@@ -169,11 +192,11 @@ namespace Library.Utils
       if (!Client.Indices.Exists(DefaultIndex).Exists)
       {
         Client.Indices.Create(DefaultIndex, i => i.Map<ElasticBook>(m => m.AutoMap()));
-        Log.Info($"Index {DefaultIndex} created.");
+        _log.Info($"Index {DefaultIndex} created.");
       }
       else
       {
-        Log.Info($"Index '{DefaultIndex}' already exists.");
+        _log.Info($"Index '{DefaultIndex}' already exists.");
       }
     }
     
