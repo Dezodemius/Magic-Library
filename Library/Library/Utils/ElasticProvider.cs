@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using Library.Entity;
 using Nest;
 using NLog;
+using NLog.Fluent;
 
 namespace Library.Utils
 {
@@ -48,12 +50,22 @@ namespace Library.Utils
     /// <param name="searchPhrase">Поисковая фраза.</param>
     public static ISearchResponse<Book> Search(string searchPhrase)
     {
-      var response = Client.Search<Book>(s => s
-        .Query(q => q
-          .MultiMatch(c => c
-            .Query(searchPhrase)
-            .Fields(f => f.Field(b => b.Text)))));
-      Log.Debug($"Searching: {searchPhrase} in index: {DefaultIndex}");
+      ISearchResponse<Book> response;
+      try
+      {
+        Log.Debug($"Searching: {searchPhrase} in index: {DefaultIndex}");
+        response = Client.Search<Book>(s => s
+          .Query(q => q
+            .MultiMatch(c => c
+              .Query(searchPhrase)
+              .Fields(f => f.Field(b => b.Text)))));
+      }
+      catch (Exception e)
+      {
+        Log.Error(e);
+        throw;
+      }
+
       return response;
     }
     
