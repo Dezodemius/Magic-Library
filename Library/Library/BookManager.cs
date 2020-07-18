@@ -40,7 +40,7 @@ namespace Library
     /// <summary>
     /// Путь к директории книжной полки.
     /// </summary>
-    public DirectoryInfo BookShelfPath { get; }
+    public DirectoryInfo BookShelfPath { get; private set; }
 
     /// <summary>
     /// Счётчик книг в библиотеке.
@@ -169,7 +169,10 @@ namespace Library
       if (!Directory.Exists(path))
       {
         Directory.CreateDirectory(path);
-        BookShelfPath.Attributes = FileAttributes.Hidden | FileAttributes.Directory;
+        BookShelfPath = new DirectoryInfo(path)
+        {
+          Attributes = FileAttributes.Hidden | FileAttributes.Directory
+        };
       }
     }
 
@@ -182,9 +185,8 @@ namespace Library
     /// </summary>
     private BookManager()
     {
-      BookShelfPath = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), BookShelfName));
-      EnsureDirectory(BookShelfPath.FullName);
-      GetAllBooks();
+      var bookShelfPath = Path.Combine(Directory.GetCurrentDirectory(), BookShelfName);
+      EnsureDirectory(bookShelfPath);
     }
 
     #endregion
