@@ -1,5 +1,4 @@
-﻿using System;
-using Nest;
+﻿using Nest;
 
 namespace Library.Entity
 {
@@ -8,42 +7,33 @@ namespace Library.Entity
   /// </summary>
   public class Book
   {
+    #region Свойства
+
+    /// <summary>
+    /// Идентификатор книги.
+    /// </summary>
+    public int Id { get; set; }
+    
     /// <summary>
     /// Название книги.
     /// </summary>
-    public string Name { get; }
+    public string Name { get; set; }
     
     /// <summary>
     /// Текст книги.
     /// </summary>
     public string Text { get; set; }
 
-    /// <summary>
-    /// Конструктор.
-    /// </summary>
-    protected Book()
-    {
-      
-    }
-    
-    /// <summary>
-    /// Конструктор.
-    /// </summary>
-    /// <param name="name">Название книги.</param>
-    public Book(string name) : this(name, string.Empty)
-    {
-    }
+    #endregion
+
+    #region Конструкторы
 
     /// <summary>
     /// Конструктор.
     /// </summary>
-    /// <param name="name">Название книги.</param>
-    /// <param name="text">Текст книги.</param>
-    public Book(string name, string text)
-    {
-      Name = name;
-      Text = text;
-    }
+    public Book() { }
+
+    #endregion
   }
 
   /// <summary>
@@ -52,15 +42,12 @@ namespace Library.Entity
   [ElasticsearchType(RelationName = "book")]
   public abstract class ElasticBook : Book
   {
-    /// <summary>
-    /// Название книги.
-    /// </summary>
+    [Text(Name = "id")]
+    public new int Id { get; set; }
+    
     [Text(Name = "name")]
     public new string Name { get; set; }
     
-    /// <summary>
-    /// Текст книги.
-    /// </summary>
     [Text(Name = "text")]
     public new string Text { get; set; }
   }
