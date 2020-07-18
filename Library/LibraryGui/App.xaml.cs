@@ -11,7 +11,7 @@ namespace LibraryGui
   { 
     private void App_OnStartup(object sender, StartupEventArgs e)
     {
-      ViewService.OpenViewModel(new MainWindowViewModel());
+      ViewService.OpenViewModel(new SearchViewModel());
     }
   }
 }

@@ -68,7 +68,7 @@
         </ApplicationDefinition>
         <Compile Include="Utils\DelegateCommand.cs" />
         <Compile Include="Utils\ViewService.cs" />
-        <Compile Include="ViewModel\MainWindowViewModel.cs" />
+        <Compile Include="ViewModel\SearchViewModel.cs" />
         <Compile Include="App.xaml.cs">
             <DependentUpon>App.xaml</DependentUpon>
             <SubType>Code</SubType>

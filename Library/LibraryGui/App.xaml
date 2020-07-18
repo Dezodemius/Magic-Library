@@ -5,7 +5,7 @@
              xmlns:viewModel="clr-namespace:LibraryGui.ViewModel"
              Startup="App_OnStartup">
     <Application.Resources>
-        <DataTemplate DataType="{x:Type viewModel:MainWindowViewModel}">
+        <DataTemplate DataType="{x:Type viewModel:SearchViewModel}">
             <view:MainWindow/>
         </DataTemplate>
     </Application.Resources>
