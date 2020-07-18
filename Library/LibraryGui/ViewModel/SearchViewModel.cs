@@ -17,7 +17,7 @@ namespace LibraryGui.ViewModel
   {
     #region Поля и свойства
 
-    public override string Name { get; } = "Главное окно";
+    public override string Name { get; } = "Поиск";
 
     public ObservableCollection<Book> FoundedBooks { get; set; } = new ObservableCollection<Book>();
 
@@ -177,7 +177,6 @@ namespace LibraryGui.ViewModel
     private static bool DeleteBookCanExecute(object arg)
     {
       return BookManager.Instance.IsBookExisted((arg as Book)?.Name);
-      ;
     }
 
     /// <summary>
@@ -192,7 +191,7 @@ namespace LibraryGui.ViewModel
       {
         var messageText = string.Empty;
 
-        if (BookManager.Instance.DeleteBook(book?.Name))
+        if (BookManager.Instance.DeleteBook(book.Name))
           messageText = $"{book.Name} - успешно удалена с диска.";
         if (ElasticProvider.Instance.DeleteBook(book))
           messageText = $"{book.Name} - успешно удалена с индекса.";

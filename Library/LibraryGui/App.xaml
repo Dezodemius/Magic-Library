@@ -7,6 +7,9 @@
              Startup="App_OnStartup">
     <Application.Resources>
         <DataTemplate DataType="{x:Type viewModel:SearchViewModel}">
+            <view:SearchControl/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModel:MainWindowViewModel}">
             <view:MainWindow/>
         </DataTemplate>
     </Application.Resources>

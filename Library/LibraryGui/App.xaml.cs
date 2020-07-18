@@ -18,7 +18,7 @@ namespace LibraryGui
     /// <param name="e">Параметр обработчика.</param>
     private void App_OnStartup(object sender, StartupEventArgs e)
     {
-      ViewService.OpenViewModel(new SearchViewModel());
+      ViewService.OpenViewModel(new MainWindowViewModel());
       ElasticSynchronizer.SynchronizeWithDisk();
     }
 
