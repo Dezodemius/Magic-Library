@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Library.Entity;
 using Library.Utils;
 using Newtonsoft.Json;
 using NLog;
@@ -89,7 +90,12 @@ namespace Library
     /// <param name="bookPath">Путь к файлу для сериализации.</param>
     private static void SerializeBook(string bookPath)
     {
-      var bookEntityForSerializing = TextLayerExtractor.ExtractTextLayer(bookPath);
+      var bookEntityForSerializing = new Book
+      {
+        Name = Path.GetFileNameWithoutExtension(bookPath),
+        Text = TextLayerExtractor.ExtractTextLayer(bookPath)
+      };
+      
       var serializedBookDestinationPath = Path.Combine((new FileInfo(bookPath)).DirectoryName ?? string.Empty,
         Path.GetFileNameWithoutExtension(bookPath) + BookDataExtension);
       
@@ -152,23 +158,25 @@ namespace Library
     /// <summary>
     /// Убедиться в наличии директории.
     /// </summary>
-    private static void EnsureDirectory(string path)
+    private void EnsureDirectory(string path)
     {
       if (!Directory.Exists(path))
+      {
         Directory.CreateDirectory(path);
+        BookShelfPath.Attributes = FileAttributes.Hidden | FileAttributes.Directory;
+      }
     }
 
     #endregion
 
     #region Конструкторы
 
+    /// <summary>
+    /// Приватный конструктор.
+    /// </summary>
     private BookManager()
     {
-      BookShelfPath = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), BookShelfName))
-      {
-        Attributes = FileAttributes.Hidden | FileAttributes.Directory
-      };
-      
+      BookShelfPath = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), BookShelfName));
       EnsureDirectory(BookShelfPath.FullName);
     }
 
