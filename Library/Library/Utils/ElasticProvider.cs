@@ -33,12 +33,12 @@ namespace Library.Utils
     /// <summary>
     /// Экземпляр клиента Elasticsearch.
     /// </summary>
-    private static ElasticClient Client { get; set; }
+    private ElasticClient Client { get; set; }
 
     /// <summary>
     /// Логгер класса.
     /// </summary>
-    private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+    private readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     #endregion
     
@@ -48,7 +48,7 @@ namespace Library.Utils
     /// Выполнить поиск.
     /// </summary>
     /// <param name="searchPhrase">Поисковая фраза.</param>
-    public static ISearchResponse<Book> Search(string searchPhrase)
+    public ISearchResponse<Book> Search(string searchPhrase)
     {
       ISearchResponse<Book> response;
       try
@@ -72,7 +72,7 @@ namespace Library.Utils
     /// <summary>
     /// Найти все книги в индексе.
     /// </summary>
-    public static IEnumerable<Book> SearchAll()
+    public IEnumerable<Book> SearchAll()
     {
       var response = Client.Search<Book>(s => s.Query(q => q.MatchAll()));
       Log.Debug($"Search all. Found {response.Documents.Count} documents.");
@@ -107,7 +107,7 @@ namespace Library.Utils
     /// Индексировать несколько документов.
     /// </summary>
     /// <param name="books">Список книг.</param>
-    public static void BulkIndex(IEnumerable<Book> books)
+    public void BulkIndex(IEnumerable<Book> books)
     {
       var bulkRequest = Client
         .Bulk(b => b
@@ -131,7 +131,7 @@ namespace Library.Utils
     /// Удалить книгу из индекса.
     /// </summary>
     /// <param name="book">Экземпляр книги.</param>
-    public static bool DeleteBook(Book book)
+    public bool DeleteBook(Book book)
     {
       var response = Client.DeleteByQuery<Book>(q => q
         .Query(rq => rq

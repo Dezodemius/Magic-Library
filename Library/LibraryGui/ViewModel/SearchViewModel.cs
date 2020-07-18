@@ -90,7 +90,7 @@ namespace LibraryGui.ViewModel
 
     private void Search(object obj)
     {
-      var documents = ElasticProvider.Search(SearchPhrase).Documents;
+      var documents = ElasticProvider.Instance.Search(SearchPhrase).Documents;
 
       UpdateMessageTextBox($"Найдено экземпляров: {documents.Count}");
 
@@ -155,7 +155,7 @@ namespace LibraryGui.ViewModel
         AppendToMessageTextBox($"{book.Name} успешно добавлена");
       }
 
-      ElasticProvider.BulkIndex(booksForIndexing);
+      ElasticProvider.Instance.BulkIndex(booksForIndexing);
       AppendToMessageTextBox("Добавление книг завершено");
     }
 
@@ -171,7 +171,7 @@ namespace LibraryGui.ViewModel
 
     private void GetAllBooks(object obj)
     {
-      var foundedBooks = ElasticProvider.SearchAll();
+      var foundedBooks = ElasticProvider.Instance.SearchAll();
 
       FoundedBooks.Clear();
       foreach (var book in foundedBooks)
@@ -198,7 +198,7 @@ namespace LibraryGui.ViewModel
 
         if (BookManager.Instance.DeleteBook(book?.Name))
           messageText = $"{book.Name} - успешно удалена с диска.";
-        if (ElasticProvider.DeleteBook(book))
+        if (ElasticProvider.Instance.DeleteBook(book))
           messageText = $"{book.Name} - успешно удалена с индекса.";
 
         AppendToMessageTextBox(messageText);
