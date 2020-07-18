@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
         <TargetFrameworks>net472;net48</TargetFrameworks>
         <LangVersion>8</LangVersion>
     </PropertyGroup>
@@ -9,6 +8,7 @@
     <ItemGroup>
       <PackageReference Include="iTextSharp" Version="5.5.13.1" />
       <PackageReference Include="NEST" Version="7.7.1" />
+      <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
       <PackageReference Include="NLog" Version="4.7.2" />
     </ItemGroup>
     <Target Name="CopyNLogConfig" AfterTargets="AfterBuild">
