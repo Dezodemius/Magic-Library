@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Threading;
+using Library.Utils;
 using LibraryGui.Utils;
 using LibraryGui.ViewModel;
 
@@ -18,6 +19,7 @@ namespace LibraryGui
     private void App_OnStartup(object sender, StartupEventArgs e)
     {
       ViewService.OpenViewModel(new SearchViewModel());
+      ElasticSynchronizer.SynchronizeWithDisk();
     }
 
     /// <summary>
