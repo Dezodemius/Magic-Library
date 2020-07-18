@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Library.Entity;
 using NLog;
-using NLog.Fluent;
 
 namespace Library.Utils
 {
@@ -22,16 +23,15 @@ namespace Library.Utils
       var booksOnDisk = BookManager.Instance.GetAllBooks();
       var booksInIndex = ElasticProvider.Instance.GetAll();
 
-      var booksOnlyOnDisk = booksOnDisk.Except(booksInIndex);
+      var booksOnlyOnDisk = booksOnDisk.Except(booksInIndex.ToList());
       if (booksOnlyOnDisk.Any())
       {
         Log.Debug($"The number of books contained on disk but not indexed: {booksOnlyOnDisk.Count(b => b.Id > 0)}");
         ElasticProvider.Instance.BulkIndex(booksOnlyOnDisk);
         Log.Info("Missing books have been indexed.");
-
       }
 
-      var booksOnlyInIndex = booksInIndex.Except(booksOnDisk);
+      var booksOnlyInIndex = booksInIndex.Except(booksOnDisk).ToList();
       if (booksOnlyInIndex.Any())
       {
         Log.Debug($"The number of books contained in the index but not on disk: {booksOnlyOnDisk.Count(b => b.Id > 0)}");

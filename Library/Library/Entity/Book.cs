@@ -13,17 +13,17 @@ namespace Library.Entity
     /// <summary>
     /// Идентификатор книги.
     /// </summary>
-    public int Id { get; }
+    public int Id { get; set; }
     
     /// <summary>
     /// Название книги.
     /// </summary>
-    public string Name { get; }
+    public string Name { get; set; }
     
     /// <summary>
     /// Текст книги.
     /// </summary>
-    public string Text { get; }
+    public string Text { get; set; }
 
     #endregion
 
@@ -53,10 +53,7 @@ namespace Library.Entity
     {
       unchecked
       {
-        var hashCode = Id;
-        hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
-        hashCode = (hashCode * 397) ^ (Text != null ? Text.GetHashCode() : 0);
-        return hashCode;
+        return Id.GetHashCode() + Name.GetHashCode() + Text.GetHashCode();
       }
     }
     
@@ -64,6 +61,9 @@ namespace Library.Entity
     
     #region Конструкторы
 
+    /// <summary>
+    /// Конструктор.
+    /// </summary>
     public Book()
     {
       
