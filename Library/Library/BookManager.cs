@@ -167,13 +167,7 @@ namespace Library
     private void EnsureDirectory(string path)
     {
       if (!Directory.Exists(path))
-      {
         Directory.CreateDirectory(path);
-        BookShelfPath = new DirectoryInfo(path)
-        {
-          Attributes = FileAttributes.Hidden | FileAttributes.Directory
-        };
-      }
     }
 
     #endregion
@@ -187,6 +181,11 @@ namespace Library
     {
       var bookShelfPath = Path.Combine(Directory.GetCurrentDirectory(), BookShelfName);
       EnsureDirectory(bookShelfPath);
+      
+      BookShelfPath = new DirectoryInfo(bookShelfPath)
+      {
+        Attributes = FileAttributes.Hidden | FileAttributes.Directory
+      };
     }
 
     #endregion
