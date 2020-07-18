@@ -62,19 +62,15 @@
         <Reference Include="PresentationFramework" />
     </ItemGroup>
     <ItemGroup>
-        <ApplicationDefinition Include="App.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </ApplicationDefinition>
         <Compile Include="Utils\DelegateCommand.cs" />
         <Compile Include="Utils\ViewService.cs" />
         <Compile Include="ViewModel\MainWindowViewModel.cs" />
         <Compile Include="ViewModel\SearchViewModel.cs" />
-        <Compile Include="App.xaml.cs">
-            <DependentUpon>App.xaml</DependentUpon>
-            <SubType>Code</SubType>
-        </Compile>
         <Compile Include="ViewModel\ViewModel.cs" />
+        <Compile Include="View\App.xaml.cs">
+          <DependentUpon>App.xaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
         <Compile Include="View\MainWindow.xaml.cs">
           <DependentUpon>MainWindow.xaml</DependentUpon>
           <SubType>Code</SubType>
@@ -116,6 +112,12 @@
         <Project>{30bd3a9f-dae6-4bbb-8652-8c48ae6d1fdd}</Project>
         <Name>Library</Name>
       </ProjectReference>
+    </ItemGroup>
+    <ItemGroup>
+      <ApplicationDefinition Include="View\App.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <SubType>Designer</SubType>
+      </ApplicationDefinition>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -4,7 +4,7 @@ using Library.Utils;
 using LibraryGui.Utils;
 using LibraryGui.ViewModel;
 
-namespace LibraryGui
+namespace LibraryGui.View
 {
   /// <summary>
   /// Interaction logic for App.xaml
