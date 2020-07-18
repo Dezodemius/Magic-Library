@@ -132,7 +132,6 @@ namespace LibraryGui.ViewModel
       UpdateMessageTextBox("Начало добавления книг");
       var openFileDialog = new OpenFileDialog
       {
-        Multiselect = true,
         Title = "Выберите файлы для индексации",
         Filter = "Книги (*.PDF)|*.PDF"
       };
