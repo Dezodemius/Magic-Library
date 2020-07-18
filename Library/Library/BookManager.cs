@@ -90,12 +90,9 @@ namespace Library
     /// <param name="bookPath">Путь к файлу для сериализации.</param>
     private static void SerializeBook(string bookPath)
     {
-      var bookEntityForSerializing = new Book
-      {
-        Name = Path.GetFileNameWithoutExtension(bookPath),
-        Text = TextLayerExtractor.ExtractTextLayer(bookPath)
-      };
-      
+      var bookEntityForSerializing = new Book(BookManager.BooksCounter + 1, Path.GetFileNameWithoutExtension(bookPath),
+        TextLayerExtractor.ExtractTextLayer(bookPath));
+
       var serializedBookDestinationPath = Path.Combine((new FileInfo(bookPath)).DirectoryName ?? string.Empty,
         Path.GetFileNameWithoutExtension(bookPath) + BookDataExtension);
       

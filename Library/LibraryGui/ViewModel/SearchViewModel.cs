@@ -144,12 +144,8 @@ namespace LibraryGui.ViewModel
       foreach (var pathToFile in openFileDialog.FileNames)
       {
         BookManager.Instance.AddBook(pathToFile);
-        var book = new Book
-        {
-          Name = Path.GetFileNameWithoutExtension(pathToFile),
-          Id = BookManager.BooksCounter + 1,
-          Text = TextLayerExtractor.ExtractTextLayer(pathToFile)
-        };
+        var book = new Book(BookManager.BooksCounter + 1, Path.GetFileNameWithoutExtension(pathToFile),
+          TextLayerExtractor.ExtractTextLayer(pathToFile));
 
         booksForIndexing.Add(book);
         AppendToMessageTextBox($"{book.Name} успешно добавлена");
@@ -171,7 +167,7 @@ namespace LibraryGui.ViewModel
 
     private void GetAllBooks(object obj)
     {
-      var foundedBooks = ElasticProvider.Instance.SearchAll();
+      var foundedBooks = ElasticProvider.Instance.GetAll();
 
       FoundedBooks.Clear();
       foreach (var book in foundedBooks)
