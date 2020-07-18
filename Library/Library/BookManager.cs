@@ -129,14 +129,23 @@ namespace Library
     /// Получить все книги с книжной полки.
     /// </summary>
     /// <returns>Коллекция наименований книг.</returns>
-    public IEnumerable<string> GetAllBooks()
+    public IEnumerable<Book> GetAllBooks()
     {
-      var bookNames = new List<string>();
-      foreach (var file in BookShelfPath.GetFiles())
-        if (file.Extension == "pdf")
-          bookNames.Add(file.Name);
+      var books = new List<Book>();
+      foreach (var pdfFile in BookShelfPath.GetFiles("*.pdf"))
+      {
+        foreach (var bookDataFile in BookShelfPath.GetFiles($"*{BookDataExtension}"))
+        {
+          if (Path.GetFileNameWithoutExtension(pdfFile.Name) == Path.GetFileNameWithoutExtension(bookDataFile.Name))
+          {
+            using var reader = new StreamReader(bookDataFile.FullName);
+            var book = JsonConvert.DeserializeObject<Book>(reader.ReadToEnd());
+            books.Add(book);
+          }
+        }
+      }
 
-      return bookNames;
+      return books;
     }
 
     /// <summary>
@@ -178,6 +187,7 @@ namespace Library
     {
       BookShelfPath = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), BookShelfName));
       EnsureDirectory(BookShelfPath.FullName);
+      GetAllBooks();
     }
 
     #endregion
