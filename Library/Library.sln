@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library", "Library\Library.csproj", "{30BD3A9F-DAE6-4BBB-8652-8C48AE6D1FDD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryGui", "LibraryGui\LibraryGui.csproj", "{53B96C3E-E5FE-46E6-B8EC-EDE7885DD8B8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library.Client", "Library.Client\Library.Client.csproj", "{53B96C3E-E5FE-46E6-B8EC-EDE7885DD8B8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

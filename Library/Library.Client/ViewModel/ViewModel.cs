@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace LibraryGui.ViewModel
+namespace Library.Client.ViewModel
 {
   /// <summary>
   /// Базовый класс модели представления.

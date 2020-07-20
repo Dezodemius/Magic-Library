@@ -1,4 +1,4 @@
-﻿namespace LibraryGui.ViewModel
+﻿namespace Library.Client.ViewModel
 {
   public class MainWindowViewModel : ViewModel
   {

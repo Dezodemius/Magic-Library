@@ -1,16 +1,18 @@
 ﻿using System.Windows;
 using System.Windows.Threading;
+using Library.Client.Utils;
+using Library.Client.ViewModel;
 using Library.Utils;
-using LibraryGui.Utils;
-using LibraryGui.ViewModel;
 
-namespace LibraryGui.View
+namespace Library.Client.View
 {
   /// <summary>
   /// Interaction logic for App.xaml
   /// </summary>
   public partial class App
-  { 
+  {
+    // private readonly Logger _log = LogManager.GetCurrentClassLogger();
+    
     /// <summary>
     /// Обработчик старта приложения.
     /// </summary>
@@ -29,7 +31,9 @@ namespace LibraryGui.View
     /// <param name="e">Параметр обработчика.</param>
     private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-      MessageBox.Show($"{e.Exception}\n{e.Exception.Message}", "Возникло исключение", MessageBoxButton.OK, MessageBoxImage.Error);
+      var message = $"{e.Exception}\n{e.Exception.Message}";
+      // _log.Error(message);
+      MessageBox.Show(message, "Возникло исключение", MessageBoxButton.OK, MessageBoxImage.Error);
       e.Handled = true;
     }
   }

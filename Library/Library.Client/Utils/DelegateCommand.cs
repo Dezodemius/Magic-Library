@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace LibraryGui.Utils
+namespace Library.Client.Utils
 {
   /// <summary>
   /// Команда.

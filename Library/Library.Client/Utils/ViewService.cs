@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 
-namespace LibraryGui.Utils
+namespace Library.Client.Utils
 {
   /// <summary>
   /// Сервис управления окнами.

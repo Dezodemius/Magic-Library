@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using Library;
+using Library.Client.Utils;
 using Library.Entity;
 using Library.Utils;
-using LibraryGui.Utils;
 using Microsoft.Win32;
 
-namespace LibraryGui.ViewModel
+namespace Library.Client.ViewModel
 {
   /// <summary>
   /// ViewModel главного окна.

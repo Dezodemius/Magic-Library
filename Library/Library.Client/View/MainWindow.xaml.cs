@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace LibraryGui.View
+namespace Library.Client.View
 {
   /// <summary>
   /// Interaction logic for MainWindow.xaml

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace LibraryGui.Properties
+namespace Library.Client.Properties
 {
   /// <summary>
   ///   A strongly-typed resource class, for looking up localized strings, etc.
@@ -45,7 +45,7 @@ namespace LibraryGui.Properties
         if ((resourceMan == null))
         {
           global::System.Resources.ResourceManager temp =
-            new global::System.Resources.ResourceManager("LibraryGui.Properties.Resources", typeof(Resources).Assembly);
+            new global::System.Resources.ResourceManager("Library.Client.Properties.Resources", typeof(Resources).Assembly);
           resourceMan = temp;
         }
 

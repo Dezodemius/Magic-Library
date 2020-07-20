@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace LibraryGui.View
+namespace Library.Client.View
 {
   public partial class SearchControl : UserControl
   {

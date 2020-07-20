@@ -1,14 +1,14 @@
-﻿<UserControl x:Class="LibraryGui.View.SearchControl"
+﻿<UserControl x:Class="Library.Client.View.SearchControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:LibraryGui.View"
-             xmlns:viewModel="clr-namespace:LibraryGui.ViewModel"
+             xmlns:view="clr-namespace:Library.Client.View"
+             xmlns:viewModel="clr-namespace:Library.Client.ViewModel"
              mc:Ignorable="d"  d:DataContext="{d:DesignInstance viewModel:SearchViewModel}"
              d:DesignHeight="500" d:DesignWidth="1000">
     <UserControl.Resources>
-        <local:IndexConverter x:Key="IndexConverter" />
+        <view:IndexConverter x:Key="IndexConverter" />
     </UserControl.Resources>
     <StackPanel Orientation="Vertical">
         <TextBox Text="{Binding SearchPhrase, Mode=OneWayToSource}" Margin="5"/>

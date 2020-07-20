@@ -1,8 +1,8 @@
-﻿<Application x:Class="LibraryGui.View.App"
+﻿<Application x:Class="Library.Client.View.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:view="clr-namespace:LibraryGui.View"
-             xmlns:viewModel="clr-namespace:LibraryGui.ViewModel"
+             xmlns:viewModel="clr-namespace:Library.Client.ViewModel"
+             xmlns:view="clr-namespace:Library.Client.View"
              DispatcherUnhandledException="App_OnDispatcherUnhandledException"
              Startup="App_OnStartup">
     <Application.Resources>
