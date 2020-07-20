@@ -74,8 +74,8 @@
           <DependentUpon>App.xaml</DependentUpon>
           <SubType>Code</SubType>
         </Compile>
-        <Compile Include="View\MainWindow.xaml.cs">
-          <DependentUpon>MainWindow.xaml</DependentUpon>
+        <Compile Include="View\MainControl.xaml.cs">
+          <DependentUpon>MainControl.xaml</DependentUpon>
           <SubType>Code</SubType>
         </Compile>
         <Compile Include="View\SearchControl.xaml.cs">
@@ -105,7 +105,7 @@
       <Folder Include="Model" />
     </ItemGroup>
     <ItemGroup>
-      <Page Include="View\MainWindow.xaml">
+      <Page Include="View\MainControl.xaml">
         <Generator>MSBuild:Compile</Generator>
         <SubType>Designer</SubType>
       </Page>

@@ -5,9 +5,9 @@ namespace Library.Client.View
   /// <summary>
   /// Interaction logic for MainWindow.xaml
   /// </summary>
-  public partial class MainWindow : UserControl
+  public partial class MainControl : UserControl
   {
-    public MainWindow()
+    public MainControl()
     {
       InitializeComponent();
     }

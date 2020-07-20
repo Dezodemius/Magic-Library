@@ -3,6 +3,7 @@ using System.Windows.Threading;
 using Library.Client.Utils;
 using Library.Client.ViewModel;
 using Library.Utils;
+using NLog;
 
 namespace Library.Client.View
 {
@@ -11,7 +12,7 @@ namespace Library.Client.View
   /// </summary>
   public partial class App
   {
-    // private readonly Logger _log = LogManager.GetCurrentClassLogger();
+    private readonly Logger _log = LogManager.GetCurrentClassLogger();
     
     /// <summary>
     /// Обработчик старта приложения.
@@ -32,7 +33,7 @@ namespace Library.Client.View
     private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
       var message = $"{e.Exception}\n{e.Exception.Message}";
-      // _log.Error(message);
+      _log.Error(message);
       MessageBox.Show(message, "Возникло исключение", MessageBoxButton.OK, MessageBoxImage.Error);
       e.Handled = true;
     }

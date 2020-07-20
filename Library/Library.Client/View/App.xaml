@@ -10,7 +10,7 @@
             <view:SearchControl/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type viewModel:MainWindowViewModel}">
-            <view:MainWindow/>
+            <view:MainControl/>
         </DataTemplate>
     </Application.Resources>
 </Application>
