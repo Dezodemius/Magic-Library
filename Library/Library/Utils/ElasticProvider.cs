@@ -57,7 +57,9 @@ namespace Library.Utils
           .Query(q => q
             .MultiMatch(c => c
               .Query(searchPhrase)
-              .Fields(f => f.Field(b => b.Text)))));
+              .Fields(f => f.Field(b => b.Text))))
+          .Highlight(h => h
+            .Fields(f => f.Field(b => b.Text))));
       }
       catch (Exception e)
       {
