@@ -142,7 +142,7 @@ namespace Library.Client.ViewModel
       foreach (var pathToFile in openFileDialog.FileNames)
       {
         BookManager.Instance.AddBook(pathToFile);
-        var book = new Book(BookManager.BooksCounter + 1, Path.GetFileNameWithoutExtension(pathToFile),
+        var book = new Book(BookManager.GetNextId(), Path.GetFileNameWithoutExtension(pathToFile),
           TextLayerExtractor.ExtractTextLayer(pathToFile));
 
         booksForIndexing.Add(book);

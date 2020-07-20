@@ -60,7 +60,6 @@ namespace Library
     /// Копировать книгу в Книжную полку.
     /// </summary>
     /// <param name="bookPath">Путь к книге.</param>
-    /// <returns>True, если удалось копировать книгу. False, если книга уже существует на полке.</returns>
     public void AddBook(string bookPath)
     {
       try
@@ -90,7 +89,7 @@ namespace Library
     /// <param name="bookPath">Путь к файлу для сериализации.</param>
     private static void SerializeBook(string bookPath)
     {
-      var bookEntityForSerializing = new Book(BookManager.BooksCounter + 1, Path.GetFileNameWithoutExtension(bookPath),
+      var bookEntityForSerializing = new Book(GetNextId(), Path.GetFileNameWithoutExtension(bookPath),
         TextLayerExtractor.ExtractTextLayer(bookPath));
 
       var serializedBookDestinationPath = Path.Combine((new FileInfo(bookPath)).DirectoryName ?? string.Empty,
@@ -146,6 +145,15 @@ namespace Library
     }
 
     /// <summary>
+    /// Получить новый Id для сущности.
+    /// </summary>
+    /// <returns>Id.</returns>
+    public static int GetNextId()
+    {
+      return BooksCounter + 1;
+    }
+    
+    /// <summary>
     /// Проверить, что книга существует в библиотеке.
     /// </summary>
     /// <param name="bookName"></param>
@@ -164,7 +172,7 @@ namespace Library
     /// <summary>
     /// Убедиться в наличии директории.
     /// </summary>
-    private void EnsureDirectory(string path)
+    private static void EnsureDirectory(string path)
     {
       if (!Directory.Exists(path))
         Directory.CreateDirectory(path);
