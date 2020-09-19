@@ -112,13 +112,15 @@ namespace Library
       if (string.IsNullOrEmpty(bookName))
         return false;
       
-      var filePath = new FileInfo(Path.Combine(BookShelfPath.FullName, bookName));
-      if (!BookShelfPath.GetFiles().Contains(filePath))
-        return false;
-
-      File.Delete(filePath.FullName);
-
-      return true;
+      var filePath = new FileInfo(Path.Combine(BookShelfPath.FullName, $"{bookName}.pdf"));
+      if (BookShelfPath.GetFiles().Any(f => f.Name == filePath.Name))
+      {
+        File.Delete(filePath.FullName);
+        File.Delete(Path.Combine(filePath.Directory?.ToString()!, $"{Path.GetFileNameWithoutExtension(filePath.Name)}.json"));
+        return true;
+      }
+      
+      return false;
     }
 
     /// <summary>

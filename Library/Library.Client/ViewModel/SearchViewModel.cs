@@ -190,9 +190,9 @@ namespace Library.Client.ViewModel
         var messageText = string.Empty;
 
         if (BookManager.Instance.DeleteBook(book.Name))
-          messageText = $"{book.Name} - успешно удалена с диска.";
+          messageText += $"{book.Name} - успешно удалена с диска.\n";
         if (ElasticProvider.Instance.DeleteBook(book))
-          messageText = $"{book.Name} - успешно удалена с индекса.";
+          messageText += $"{book.Name} - успешно удалена с индекса.\n";
 
         AppendToMessageTextBox(messageText);
       }
