@@ -1,0 +1,51 @@
+﻿<UserControl x:Class="Library.Client.View.SearchControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:view="clr-namespace:Library.Client.View"
+             xmlns:viewModel="clr-namespace:Library.Client.ViewModel"
+             mc:Ignorable="d"  d:DataContext="{d:DesignInstance viewModel:SearchViewModel}">
+    <UserControl.Resources>
+        <view:IndexConverter x:Key="IndexConverter" />
+    </UserControl.Resources>
+    <StackPanel Orientation="Vertical">
+        <TextBox Text="{Binding SearchPhrase, Mode=OneWayToSource}" Margin="5"/>
+        <StackPanel Orientation="Horizontal" Margin="5" Width="Auto">
+            <Button Margin="0 0 5 0" Command="{Binding SearchCommand}">Поиск</Button>
+            <Button Margin="5 0 5 0" Command="{Binding AddBookCommand}">Добавить</Button>
+            <Button Margin="5 0 5 0" Command="{Binding GetAllBooksCommand}">Получить все книги</Button>
+        </StackPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" CanContentScroll="True">
+            <ListView MinHeight="300" Margin="5 0 5 0" HorizontalContentAlignment="Left" 
+                      ItemsSource="{Binding Path=FoundedBooks}">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn DisplayMemberBinding="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}, 
+                                        Converter={StaticResource IndexConverter}}"
+                                        Width="30">№</GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Width="300">Название</GridViewColumn>
+                    </GridView>
+                </ListView.View>
+                <ListView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Открыть"
+                                  CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, 
+                              Path=PlacementTarget.SelectedItem}" 
+                                  Command="{Binding OpenBookCommand}"/>
+                        <MenuItem Header="Удалить" 
+                                  CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, 
+                              Path=PlacementTarget.SelectedItem}" 
+                                  Command="{Binding DeleteBookCommand}"/>
+                    </ContextMenu>
+                </ListView.ContextMenu>
+            </ListView>
+        </ScrollViewer>
+        <ScrollViewer CanContentScroll="True" Height="70" VerticalScrollBarVisibility="Auto">
+            <TextBox MinHeight="55" 
+                     Margin="5 10 5 0" 
+                     Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" 
+                     IsReadOnly="True"/>
+        </ScrollViewer>
+    </StackPanel>
+</UserControl>
