@@ -21,9 +21,9 @@ namespace Library.Entity
     public string Name { get; set; }
     
     /// <summary>
-    /// Текст книги.
+    /// Вложение книги, которое содержит в себе текстовый слой в формате base64.
     /// </summary>
-    public string Text { get; set; }
+    public Attachment Attachment { get; set; }
 
     #endregion
 
@@ -46,14 +46,14 @@ namespace Library.Entity
         return false;
       if (ReferenceEquals(this, other)) 
         return true;
-      return Id == other.Id && Name == other.Name && Text == other.Text;
+      return Id == other.Id && Name == other.Name && Attachment == other.Attachment;
     }
 
     public override int GetHashCode()
     {
       unchecked
       {
-        return Id.GetHashCode() + Name.GetHashCode() + Text.GetHashCode();
+        return Id.GetHashCode() + Name.GetHashCode() + Attachment.GetHashCode();
       }
     }
     
@@ -74,30 +74,17 @@ namespace Library.Entity
     /// </summary>
     /// <param name="id">Id книги.</param>
     /// <param name="name">Название книги.</param>
-    /// <param name="text">Текст книги.</param>
-    public Book(int id, string name, string text)
+    /// <param name="textInBase64">Текст книги (должен быть в base64!!!).</param>
+    public Book(int id, string name, string textInBase64)
     {
       Id = id;
       Name = name;
-      Text = text;
+      Attachment = new Attachment
+      {
+        Content = textInBase64
+      };
     }
 
     #endregion
-  }
-
-  /// <summary>
-  /// Объект книги для ES.
-  /// </summary>
-  [ElasticsearchType(RelationName = "book")]
-  public abstract class ElasticBook : Book
-  {
-    [Text(Name = "id")]
-    public new int Id { get; set; }
-    
-    [Text(Name = "name")]
-    public new string Name { get; set; }
-    
-    [Text(Name = "text")]
-    public new string Text { get; set; }
   }
 }

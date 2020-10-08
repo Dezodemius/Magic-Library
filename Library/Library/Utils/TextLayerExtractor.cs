@@ -1,8 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
-using iTextSharp.text.pdf;
-using iTextSharp.text.pdf.parser;
 using NLog;
 
 namespace Library.Utils
