@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Library.Entity;
 using Nest;
 using NLog;
@@ -18,6 +19,16 @@ namespace Library.Utils
     /// </summary>
     private const string DefaultIndex = "books";
 
+    /// <summary>
+    /// Имя пайплайна ingest-attachment.
+    /// </summary>
+    private const string PipelineAttachmentName = "attachment";
+
+    /// <summary>
+    /// Имя ingest-attachment.
+    /// </summary>
+    private const string IngestAttachmentName = "ingest-attachment";
+    
     #endregion
     
     #region Поля и свойства
@@ -57,7 +68,8 @@ namespace Library.Utils
           .Query(q => q
             .MultiMatch(c => c
               .Query(searchPhrase)
-              .Fields(f => f.Field(b => b.Text))))
+              .Fields(
+                f => f.Field(b => b.Text))))
           .Highlight(h => h
             .Fields(f => f.Field(b => b.Text))));
       }
@@ -92,6 +104,17 @@ namespace Library.Utils
     }
 
     /// <summary>
+    /// Получить все плагины ES.
+    /// </summary>
+    /// <returns>Список плагинов.</returns>
+    public IReadOnlyCollection<CatPluginsRecord> GetPlugins()
+    {
+      var plugins = Client.Cat.Plugins();
+      _log.Info(string.Join(Environment.NewLine, plugins.Records));
+      return plugins.Records;
+    }
+
+    /// <summary>
     /// Индексировать документ.
     /// </summary>
     /// <param name="book">Экземпляр книги.</param>
@@ -99,7 +122,8 @@ namespace Library.Utils
     {
       var indexResponse = Client
         .Index(book, i => i
-          .Index(DefaultIndex));
+          .Index(DefaultIndex)
+          .Pipeline(PipelineAttachmentName));
       
       _log.Debug($"{book.Name} is indexed: {indexResponse.IsValid}.");
     }
@@ -113,7 +137,8 @@ namespace Library.Utils
       var bulkRequest = Client
         .Bulk(b => b
           .Index(DefaultIndex)
-          .IndexMany(books));
+          .IndexMany(books)
+          .Pipeline(PipelineAttachmentName));
 
       if (bulkRequest.Errors)
       {
@@ -200,6 +225,9 @@ namespace Library.Utils
       {
         _log.Info($"Index '{DefaultIndex}' already exists.");
       }
+
+      if (GetPlugins().All(p => p.Component != IngestAttachmentName))
+        throw new RequiredPluginNotInstalled($"'{IngestAttachmentName}' not installed.");
     }
     
     #endregion

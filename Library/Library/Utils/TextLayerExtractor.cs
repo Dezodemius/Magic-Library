@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.IO;
+using System.Text;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using NLog;
@@ -19,20 +21,11 @@ namespace Library.Utils
     /// Извлечь текст PDF-документа.
     /// </summary>
     /// <param name="pdfPath">Имя файла.</param>
-    /// <returns>Текстовый слой.</returns>
+    /// <returns>Текстовый слой в base64.</returns>
     public static string ExtractTextLayer(string pdfPath)
     {
-      using var pdfReader = new PdfReader(pdfPath);
-      
-      Log.Debug($"Filename: {pdfPath}; Number of pages: {pdfReader.NumberOfPages}");
-      
-      var text = new StringBuilder();
-      var strategy = new SimpleTextExtractionStrategy();
-
-      for (var i = 1; i < pdfReader.NumberOfPages; i++)
-        text.Append(PdfTextExtractor.GetTextFromPage(pdfReader, i, strategy));
-      
-      return text.ToString();
+      var pdfBytes = File.ReadAllBytes(pdfPath);
+      return Convert.ToBase64String(pdfBytes);
     }
   }
 }
