@@ -49,7 +49,7 @@ namespace Library.Utils
     /// Логгер класса.
     /// </summary>
     private readonly Logger _log = LogManager.GetCurrentClassLogger();
-
+    
     #endregion
     
     #region Методы
@@ -58,6 +58,7 @@ namespace Library.Utils
     /// Выполнить поиск.
     /// </summary>
     /// <param name="searchPhrase">Поисковая фраза.</param>
+    /// <returns>Результат поиска.</returns>
     public ISearchResponse<Book> Search(string searchPhrase)
     {
       ISearchResponse<Book> response;
@@ -85,6 +86,7 @@ namespace Library.Utils
     /// <summary>
     /// Найти все книги в индексе.
     /// </summary>
+    /// <returns>Список всех книг в индексе.</returns>
     public IEnumerable<Book> GetAll()
     {
       var response = Client.Search<Book>(s => s.Query(q => q.MatchAll()));
@@ -107,7 +109,7 @@ namespace Library.Utils
     /// Получить все плагины ES.
     /// </summary>
     /// <returns>Список плагинов.</returns>
-    public IReadOnlyCollection<CatPluginsRecord> GetPlugins()
+    private IEnumerable<CatPluginsRecord> GetPlugins()
     {
       var plugins = Client.Cat.Plugins();
       _log.Info(string.Join(Environment.NewLine, plugins.Records));
@@ -181,6 +183,7 @@ namespace Library.Utils
     /// Удалить книгу из индекса.
     /// </summary>
     /// <param name="book">Экземпляр книги.</param>
+    /// <returns>True, если книга удалена успешно.</returns>
     public bool DeleteBook(Book book)
     {
       var response = Client.DeleteByQuery<Book>(q => q
@@ -192,9 +195,9 @@ namespace Library.Utils
     }
 
     /// <summary>
-    /// Получить
+    /// Получить количество проиндексированных книг.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Число книг.</returns>
     public int GetBooksCount()
     {
       var response = Client.Count<Book>();
@@ -212,9 +215,9 @@ namespace Library.Utils
     /// </summary>
     private ElasticProvider()
     {
-      var setting = new ConnectionSettings().DefaultIndex(DefaultIndex);
+      var settings = new ConnectionSettings().DefaultIndex(DefaultIndex);
       
-      Client = new ElasticClient(setting);
+      Client = new ElasticClient(settings);
       
       if (!Client.Indices.Exists(DefaultIndex).Exists)
       {
@@ -225,7 +228,7 @@ namespace Library.Utils
       {
         _log.Info($"Index '{DefaultIndex}' already exists.");
       }
-
+      
       if (GetPlugins().All(p => p.Component != IngestAttachmentName))
         throw new RequiredPluginNotInstalled($"'{IngestAttachmentName}' not installed.");
     }
