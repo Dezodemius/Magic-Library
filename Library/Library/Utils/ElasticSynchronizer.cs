@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Library.Entity;
 using NLog;
@@ -20,6 +21,15 @@ namespace Library.Utils
     /// </summary>
     public static void SynchronizeWithDisk()
     {
+      // var path = "\"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe\" \"D:\\Загрузки\\264181.pdf^#page=4\"";
+      // var a = new Process
+      // {
+      //   StartInfo = new ProcessStartInfo(path)
+      //   {
+      //     UseShellExecute = false
+      //   }
+      // };
+      // a.Start();
       var booksOnDisk = BookManager.Instance.GetAllBooks();
       var booksInIndex = ElasticProvider.Instance.GetAll();
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Elasticsearch.Net;
 using Library.Entity;
 using Nest;
 using NLog;
@@ -81,11 +82,11 @@ namespace Library.Utils
     /// <summary>
     /// Проверить наличие требуемых плагинов в ES.
     /// </summary>
-    /// <exception cref="RequiredPluginNotInstalled">Возникает в случае отсутсвия требуемых плагинов.</exception>
+    /// <exception cref="RequiredPluginNotInstalledException">Возникает в случае отсутсвия требуемых плагинов.</exception>
     private void CheckRequiredPlugins()
     {
       if (GetPlugins().All(p => p.Component != IngestAttachmentName))
-        throw new RequiredPluginNotInstalled($"'{IngestAttachmentName}' not installed.");
+        throw new RequiredPluginNotInstalledException($"'{IngestAttachmentName}' not installed.");
     }
 
     /// <summary>
@@ -256,7 +257,9 @@ namespace Library.Utils
     /// </summary>
     private ElasticProvider()
     {
-      var settings = new ConnectionSettings().DefaultIndex(DefaultIndex);
+      var settings = new ConnectionSettings(new Uri("http://localhost:9200"))
+        .DefaultIndex(DefaultIndex)
+        .ThrowExceptions();
       
       Client = new ElasticClient(settings);
       
