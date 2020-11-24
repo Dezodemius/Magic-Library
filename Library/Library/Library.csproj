@@ -12,6 +12,22 @@
       <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
       <PackageReference Include="NLog" Version="4.7.2" />
     </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Resources\LibraryResources.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>LibraryResources.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <EmbeddedResource Remove="Resources\LibraryResources.ru-ru.resx" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Resources\LibraryResources.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>LibraryResources.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
     <Target Name="CopyNLogConfig" AfterTargets="AfterBuild">
         <Copy SourceFiles="NLog.config" DestinationFolder="$(OutDir)" />
     </Target>

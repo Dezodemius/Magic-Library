@@ -94,8 +94,11 @@ namespace Library.Client.ViewModel
       UpdateMessageTextBox($"Найдено экземпляров: {documents.Count}");
 
       FoundedBooks.Clear();
-      foreach (var result in documents)
-        FoundedBooks.Add(result);
+      foreach (var page in documents)
+      {
+        var book = BookManager.Instance.GetBook(page.BookId);
+        FoundedBooks.Add(book);
+      }
     }
 
     /// <summary>
@@ -142,11 +145,13 @@ namespace Library.Client.ViewModel
       foreach (var pathToFile in openFileDialog.FileNames)
       {
         BookManager.Instance.AddBook(pathToFile);
-        var book = new Book(BookManager.GetNextId(), Path.GetFileNameWithoutExtension(pathToFile),
-          TextLayerExtractor.ExtractTextLayer(pathToFile));
+        var book = new Book(new Guid(), Path.GetFileNameWithoutExtension(pathToFile));
 
         booksForIndexing.Add(book);
         AppendToMessageTextBox($"{book.Name} успешно добавлена");
+    
+        var pages = TextLayerExtractor.GetTextLayerWithPages(pathToFile, book.Id);
+        ElasticProvider.Instance.BulkIndex(pages);
       }
 
       ElasticProvider.Instance.BulkIndex(booksForIndexing);
@@ -165,7 +170,7 @@ namespace Library.Client.ViewModel
 
     private void GetAllBooks(object obj)
     {
-      var foundedBooks = ElasticProvider.Instance.GetAll();
+      var foundedBooks = ElasticProvider.Instance.GetAllBooks();
 
       FoundedBooks.Clear();
       foreach (var book in foundedBooks)

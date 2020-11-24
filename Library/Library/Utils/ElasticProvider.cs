@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Elasticsearch.Net;
 using Library.Entity;
+using Library.Resources;
 using Nest;
 using NLog;
+using Page = Library.Entity.Page;
 
 namespace Library.Utils
 {
@@ -16,10 +17,15 @@ namespace Library.Utils
     #region Константы
     
     /// <summary>
-    /// Имя индекса по умолчанию.
+    /// Имя индекса с книгами.
     /// </summary>
-    private const string DefaultIndex = "books";
-
+    private const string BooksIndexName = "books";
+    
+    /// <summary>
+    /// Имя индекса со страницами.
+    /// </summary>
+    private const string PagesIndexName = "pages";
+    
     /// <summary>
     /// Имя пайплайна ingest-attachment.
     /// </summary>
@@ -120,19 +126,33 @@ namespace Library.Utils
     #region Индексация
     
     /// <summary>
-    /// Индексировать документ.
+    /// Индексировать книгу.
     /// </summary>
     /// <param name="book">Экземпляр книги.</param>
     public void Index(Book book)
     {
       var indexResponse = Client
         .Index(book, i => i
-          .Index(DefaultIndex)
+          .Index(BooksIndexName)
           .Pipeline(PipelineAttachmentName));
       
       _log.Debug($"{book.Name} is indexed: {indexResponse.IsValid}.");
     }
 
+    /// <summary>
+    /// Индексировать страницу книги.
+    /// </summary>
+    /// <param name="page">Страница книги.</param>
+    public void Index(Page page)
+    {
+      var indexResponse = Client
+        .Index(page, i => i
+          .Index(PagesIndexName)
+          .Pipeline(PipelineAttachmentName));
+      
+      _log.Debug($"Page #{page.Number} is indexed: {indexResponse.IsValid}.");
+    }
+    
     /// <summary>
     /// Индексировать несколько документов.
     /// </summary>
@@ -141,9 +161,8 @@ namespace Library.Utils
     {
       var bulkRequest = Client
         .Bulk(b => b
-          .Index(DefaultIndex)
-          .IndexMany(books)
-          .Pipeline(PipelineAttachmentName));
+          .Index(BooksIndexName)
+          .IndexMany(books));
 
       if (bulkRequest.Errors)
       {
@@ -158,22 +177,48 @@ namespace Library.Utils
       }
     }
     
+    /// <summary>
+    /// Индексировать несколько документов.
+    /// </summary>
+    /// <param name="pages">Список книг.</param>
+    public void BulkIndex(IEnumerable<Page> pages)
+    {
+      var bulkResponse = Client
+        .Bulk(p => p
+          .Index(PagesIndexName)
+          .IndexMany(pages)
+          .Pipeline(PipelineAttachmentName));
+
+      if (bulkResponse.Errors)
+      {
+        foreach (var itemWithError in bulkResponse.ItemsWithErrors)
+        {
+          _log.Debug("Failed to index document {0}: {1}", itemWithError.Id, itemWithError.Error);
+        }
+      }
+      else
+      {
+        _log.Debug($"Bulk Indexing. {pages.Count()} indexed.");
+      }
+    }
+    
     #endregion
 
     #region Поиск
 
     /// <summary>
-    /// Выполнить поиск.
+    /// Выполнить поиск по книгам.
     /// </summary>
+    /// <remarks>Поиск идёт относительно наименований книг.</remarks>
     /// <param name="searchPhrase">Поисковая фраза.</param>
     /// <returns>Результат поиска.</returns>
-    public ISearchResponse<Book> Search(string searchPhrase)
+    public ISearchResponse<Page> Search(string searchPhrase)
     {
-      ISearchResponse<Book> response;
+      ISearchResponse<Page> response;
       try
       {
-        _log.Debug($"Searching: {searchPhrase} in index: {DefaultIndex}");
-        response = Client.Search<Book>(s => s
+        _log.Debug($"Searching: {searchPhrase} in index: {PagesIndexName}");
+        response = Client.Search<Page>(s => s
           .Query(q => q
             .MultiMatch(c => c
               .Query(searchPhrase)
@@ -188,21 +233,35 @@ namespace Library.Utils
         _log.Error(e, e.StackTrace);
         throw;
       }
-
       return response;
     }
     
     /// <summary>
-    /// Найти все книги в индексе.
+    /// Найти все сущности в индексе.
     /// </summary>
-    /// <returns>Список всех книг в индексе.</returns>
-    public IEnumerable<Book> GetAll()
+    /// <returns>Список всех сущностей в индексе.</returns>
+    public IEnumerable<Book> GetAllBooks()
     {
       var response = Client.Search<Book>(s => s.Query(q => q.MatchAll()));
       _log.Debug($"Search all. Found {response.Documents.Count} documents.");
       return response.Documents;
     }
-
+    
+    /// <summary>
+    /// Найти все страницы книг в индексе.
+    /// </summary>
+    /// <returns>Список всех страниц в индексе.</returns>
+    public IEnumerable<Page> GetAllPages(Guid guid)
+    {
+      var response = Client.Search<Page>(s => s
+        .Query(q => q
+          .Match(m => m
+            .Field(f => f.BookId)
+            .Query(guid.ToString()))));
+      _log.Debug($"Search all. Found {response.Documents.Count} documents.");
+      return response.Documents;
+    }
+    
     #endregion
 
     #region Удаление
@@ -215,7 +274,7 @@ namespace Library.Utils
     {
       var bulkRequest = Client
         .Bulk(b => b
-          .Index(DefaultIndex)
+          .Index(BooksIndexName)
           .DeleteMany(books));
 
       if (bulkRequest.Errors)
@@ -248,6 +307,61 @@ namespace Library.Utils
 
     #endregion
 
+    /// <summary>
+    /// Создать и настроить индекс /books.
+    /// </summary>
+    private void CreateBooksIndex()
+    {
+      if (!Client.Indices.Exists(BooksIndexName).Exists)
+      {
+        Client.Indices.Create(BooksIndexName,
+          i => i
+            .Map<Book>(m => m
+              .AutoMap()));
+
+        _log.Info($"Index {BooksIndexName} created.");
+      }
+      else
+      {
+        _log.Info($"Index '{BooksIndexName}' already exists.");
+      }
+    }
+    
+    /// <summary>
+    /// Создать и настроить индекс /pages.
+    /// </summary>
+    private void CreatePagesIndex()
+    {
+      if (!Client.Indices.Exists(PagesIndexName).Exists)
+      {
+        Client.Indices.Create(PagesIndexName,
+          i => i
+            .Map<Page>(m => m
+              .AutoMap()
+              .Properties(p => p
+                .Text(t => t
+                  .Name(n => n.Attachment.Content)
+                  .SearchAnalyzer("russian_morphology"))))
+            .Settings(s => s
+              .Analysis(a => a
+                .TokenFilters(f => f
+                  .Stemmer("russian_stemmer", st => st.Language("russian"))
+                  .Stop("morphology_stopwords",
+                    w => w.StopWords(new StopWords(LibraryResources.StopWords))))
+                .Analyzers(aa => aa
+                  .Custom("russian_morphology", c => c
+                    .Tokenizer("standard")
+                    .Filters("lowercase", "russian_morphology", "english_morphology", "morphology_stopwords",
+                      "russian_stemmer"))))));
+
+        _log.Info($"Index {PagesIndexName} created.");
+      }
+      else
+      {
+        _log.Info($"Index '{PagesIndexName}' already exists.");
+      }
+    }
+    
     #endregion
 
     #region Конструкторы
@@ -257,38 +371,14 @@ namespace Library.Utils
     /// </summary>
     private ElasticProvider()
     {
-      var settings = new ConnectionSettings(new Uri("http://localhost:9200"))
-        .DefaultIndex(DefaultIndex)
+      var settings = new ConnectionSettings(new Uri(LibraryResources.ElasticDefaultAddress))
+        .DefaultIndex(BooksIndexName)
         .ThrowExceptions();
       
       Client = new ElasticClient(settings);
-      
-      if (!Client.Indices.Exists(DefaultIndex).Exists)
-      {
-        Client.Indices.Create(DefaultIndex, 
-          i => i
-            .Map<Book>(m => m
-              .AutoMap()
-              .Properties(p => p
-                .Text(t => t
-                  .Name(n => n.Attachment.Content)
-                  .SearchAnalyzer("russian_morphology"))))
-            .Settings(s => s
-              .Analysis(a => a
-                .TokenFilters(f => f
-                  .Stemmer("russian_stemmer", s => s.Language("russian"))
-                  .Stop("morphology_stopwords", w => w.StopWords("а,без,более,бы,был,была,были,было,быть,в,вам,вас,весь,во,вот,все,всего,всех,вы,где,да,даже,для,до,его,ее,если,есть,еще,же,за,здесь,и,из,или,им,их,к,как,ко,когда,кто,ли,либо,мне,может,мы,на,надо,наш,не,него,нее,нет,ни,них,но,ну,о,об,однако,он,она,они,оно,от,очень,по,под,при,с,со,так,также,такой,там,те,тем,то,того,тоже,той,только,том,ты,у,уже,хотя,чего,чей,чем,что,чтобы,чье,чья,эта,эти,это,я,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with")))
-                .Analyzers(aa => aa
-                  .Custom("russian_morphology", c => c
-                    .Tokenizer("standard")
-                    .Filters("lowercase", "russian_morphology", "english_morphology", "morphology_stopwords", "russian_stemmer"))))));
-       
-        _log.Info($"Index {DefaultIndex} created.");
-      }
-      else
-      {
-        _log.Info($"Index '{DefaultIndex}' already exists.");
-      }
+
+      CreateBooksIndex();
+      CreatePagesIndex();
       
       CheckRequiredPlugins();
       PutPipeline();

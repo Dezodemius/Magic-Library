@@ -1,5 +1,4 @@
 ﻿using System;
-using Nest;
 
 namespace Library.Entity
 {
@@ -13,17 +12,12 @@ namespace Library.Entity
     /// <summary>
     /// Идентификатор книги.
     /// </summary>
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     
     /// <summary>
     /// Название книги.
     /// </summary>
     public string Name { get; set; }
-    
-    /// <summary>
-    /// Вложение книги, которое содержит в себе текстовый слой в формате base64.
-    /// </summary>
-    public Attachment Attachment { get; set; }
 
     #endregion
 
@@ -46,14 +40,14 @@ namespace Library.Entity
         return false;
       if (ReferenceEquals(this, other)) 
         return true;
-      return Id == other.Id && Name == other.Name && Attachment == other.Attachment;
+      return Id == other.Id && Name == other.Name;
     }
 
     public override int GetHashCode()
     {
       unchecked
       {
-        return Id.GetHashCode() + Name.GetHashCode() + Attachment.GetHashCode();
+        return Id.GetHashCode() + Name.GetHashCode();
       }
     }
     
@@ -66,7 +60,6 @@ namespace Library.Entity
     /// </summary>
     public Book()
     {
-      
     }
     
     /// <summary>
@@ -74,15 +67,10 @@ namespace Library.Entity
     /// </summary>
     /// <param name="id">Id книги.</param>
     /// <param name="name">Название книги.</param>
-    /// <param name="textInBase64">Текст книги (должен быть в base64!!!).</param>
-    public Book(int id, string name, string textInBase64)
+    public Book(Guid id, string name)
     {
       Id = id;
       Name = name;
-      Attachment = new Attachment
-      {
-        Content = textInBase64
-      };
     }
 
     #endregion
