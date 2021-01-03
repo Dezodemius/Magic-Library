@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using Library.Entity;
 using Library.Resources;
 using Nest;
@@ -102,7 +104,7 @@ namespace Library.Utils
     {
       Client.Ingest.PutPipeline(PipelineAttachmentName, p => p
         .Processors(ps => ps
-          .Attachment<Book>(a => a
+          .Attachment<Page>(a => a
             .TargetField(PipelineAttachmentName)
             .Field(PipelineAttachmentName))));
       
@@ -133,7 +135,7 @@ namespace Library.Utils
     {
       var indexResponse = Client
         .Index(book, i => i
-          .Index(BooksIndexName)
+          .Index(Indices.Index(BooksIndexName))
           .Pipeline(PipelineAttachmentName));
       
       _log.Debug($"{book.Name} is indexed: {indexResponse.IsValid}.");
@@ -147,7 +149,7 @@ namespace Library.Utils
     {
       var indexResponse = Client
         .Index(page, i => i
-          .Index(PagesIndexName)
+          .Index(Indices.Index(PagesIndexName))
           .Pipeline(PipelineAttachmentName));
       
       _log.Debug($"Page #{page.Number} is indexed: {indexResponse.IsValid}.");
@@ -161,7 +163,7 @@ namespace Library.Utils
     {
       var bulkRequest = Client
         .Bulk(b => b
-          .Index(BooksIndexName)
+          .Index(Indices.Index(BooksIndexName))
           .IndexMany(books));
 
       if (bulkRequest.Errors)
@@ -185,7 +187,7 @@ namespace Library.Utils
     {
       var bulkResponse = Client
         .Bulk(p => p
-          .Index(PagesIndexName)
+          .Index(Indices.Index(PagesIndexName))
           .IndexMany(pages)
           .Pipeline(PipelineAttachmentName));
 
@@ -214,23 +216,36 @@ namespace Library.Utils
     /// <returns>Результат поиска.</returns>
     public ISearchResponse<Page> Search(string searchPhrase)
     {
+      using (var client = new HttpClient())
+      {
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        var request = new HttpRequestMessage(HttpMethod.Get, @"http://localhost:9200/pages/_search/")
+        {
+          Content = new StringContent(@"{
+        ""query"": {
+          ""match"": {""attachment.content"" : ""enhanced""}
+        },
+        ""highlight"": {""fields"" : {""attachment.content"" : {}, ""bookId"" : {}}}
+      }")
+        };
+        var response1 = client.SendAsync(request);
+        var a = response1.Result;
+      }
       ISearchResponse<Page> response;
       try
       {
         _log.Debug($"Searching: {searchPhrase} in index: {PagesIndexName}");
-        response = Client.Search<Page>(s => s
+        response = Client.Search<Page>(s => s.Index(Indices.Index(PagesIndexName))
           .Query(q => q
-            .MultiMatch(c => c
-              .Query(searchPhrase)
-              .Analyzer("russian_morphology")
-              .Fields(
-                f => f.Field(b => b.Attachment.Content))))
+            .Match(c => c
+              .Field(f =>  f.Attachment.Content)
+              .Query(searchPhrase)))
           .Highlight(h => h
             .Fields(f => f.Field(b => b.Attachment.Content))));
       }
       catch (Exception e)
       {
-        _log.Error(e, e.StackTrace);
+        _log.Error(e, e.Message);
         throw;
       }
       return response;
@@ -255,9 +270,9 @@ namespace Library.Utils
     {
       var response = Client.Search<Page>(s => s
         .Query(q => q
-          .Match(m => m
+          .Term(m => m
             .Field(f => f.BookId)
-            .Query(guid.ToString()))));
+            .Value(guid))));
       _log.Debug($"Search all. Found {response.Documents.Count} documents.");
       return response.Documents;
     }
@@ -312,9 +327,9 @@ namespace Library.Utils
     /// </summary>
     private void CreateBooksIndex()
     {
-      if (!Client.Indices.Exists(BooksIndexName).Exists)
+      if (!Client.Indices.Exists(Indices.Index(BooksIndexName)).Exists)
       {
-        Client.Indices.Create(BooksIndexName,
+        Client.Indices.Create(Indices.Index(BooksIndexName),
           i => i
             .Map<Book>(m => m
               .AutoMap()));
@@ -332,27 +347,13 @@ namespace Library.Utils
     /// </summary>
     private void CreatePagesIndex()
     {
-      if (!Client.Indices.Exists(PagesIndexName).Exists)
+      if (!Client.Indices.Exists(Indices.Parse(PagesIndexName)).Exists)
       {
-        Client.Indices.Create(PagesIndexName,
+        Client.Indices.Create(Indices.Index(PagesIndexName),
           i => i
             .Map<Page>(m => m
               .AutoMap()
-              .Properties(p => p
-                .Text(t => t
-                  .Name(n => n.Attachment.Content)
-                  .SearchAnalyzer("russian_morphology"))))
-            .Settings(s => s
-              .Analysis(a => a
-                .TokenFilters(f => f
-                  .Stemmer("russian_stemmer", st => st.Language("russian"))
-                  .Stop("morphology_stopwords",
-                    w => w.StopWords(new StopWords(LibraryResources.StopWords))))
-                .Analyzers(aa => aa
-                  .Custom("russian_morphology", c => c
-                    .Tokenizer("standard")
-                    .Filters("lowercase", "russian_morphology", "english_morphology", "morphology_stopwords",
-                      "russian_stemmer"))))));
+              ));
 
         _log.Info($"Index {PagesIndexName} created.");
       }
@@ -372,7 +373,7 @@ namespace Library.Utils
     private ElasticProvider()
     {
       var settings = new ConnectionSettings(new Uri(LibraryResources.ElasticDefaultAddress))
-        .DefaultIndex(BooksIndexName)
+        .DefaultIndex(PagesIndexName)
         .ThrowExceptions();
       
       Client = new ElasticClient(settings);

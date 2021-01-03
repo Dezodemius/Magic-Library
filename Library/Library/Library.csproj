@@ -28,6 +28,10 @@
         <DependentUpon>LibraryResources.resx</DependentUpon>
       </Compile>
     </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="System.Net.Http" />
+    </ItemGroup>
     <Target Name="CopyNLogConfig" AfterTargets="AfterBuild">
         <Copy SourceFiles="NLog.config" DestinationFolder="$(OutDir)" />
     </Target>

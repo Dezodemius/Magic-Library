@@ -22,6 +22,7 @@ namespace Library.Utils
     /// </summary>
     public static void SynchronizeWithDisk()
     {
+      ElasticProvider.Instance.Search("");
       var booksOnDisk = BookManager.Instance.GetAllBooks();
       var booksInIndex = ElasticProvider.Instance.GetAllBooks();
 

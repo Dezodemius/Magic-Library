@@ -84,7 +84,7 @@ namespace Library
     /// <param name="bookPath">Путь к файлу для сериализации.</param>
     private static void SerializeBook(string bookPath)
     {
-      var bookEntityForSerializing = new Book(new Guid(), Path.GetFileNameWithoutExtension(bookPath));
+      var bookEntityForSerializing = new Book(Guid.NewGuid(), Path.GetFileNameWithoutExtension(bookPath));
 
       var serializedBookDestinationPath = Path.Combine((new FileInfo(bookPath)).DirectoryName ?? string.Empty,
         Path.GetFileNameWithoutExtension(bookPath) + BookDataExtension);

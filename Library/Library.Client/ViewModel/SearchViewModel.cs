@@ -89,6 +89,8 @@ namespace Library.Client.ViewModel
 
     private void Search(object obj)
     {
+      if (string.IsNullOrEmpty(SearchPhrase))
+        return;
       var documents = ElasticProvider.Instance.Search(SearchPhrase).Documents;
 
       UpdateMessageTextBox($"Найдено экземпляров: {documents.Count}");
@@ -145,7 +147,7 @@ namespace Library.Client.ViewModel
       foreach (var pathToFile in openFileDialog.FileNames)
       {
         BookManager.Instance.AddBook(pathToFile);
-        var book = new Book(new Guid(), Path.GetFileNameWithoutExtension(pathToFile));
+        var book = new Book(Guid.NewGuid(), Path.GetFileNameWithoutExtension(pathToFile));
 
         booksForIndexing.Add(book);
         AppendToMessageTextBox($"{book.Name} успешно добавлена");
