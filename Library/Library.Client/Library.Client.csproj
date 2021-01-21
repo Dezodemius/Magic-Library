@@ -88,12 +88,12 @@
         </Compile>
     </ItemGroup>
     <ItemGroup>
+        <None Include="..\Library\NLog.config">
+          <Link>NLog.config</Link>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
         <None Include="App.config" />
-        <None Include="NLog.config" />
         <None Include="packages.config" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Model" />
     </ItemGroup>
     <ItemGroup>
       <Page Include="View\MainControl.xaml">
@@ -115,7 +115,7 @@
       </ApplicationDefinition>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-    <Target Name="CopyNLogConfig" AfterTargets="AfterBuild">
-        <Copy SourceFiles="NLog.config" DestinationFolder="$(OutDir)" />
-    </Target>
+<!--    <Target Name="CopyNLogConfig" AfterTargets="AfterBuild">-->
+<!--        <Copy SourceFiles="NLog.config" DestinationFolder="$(OutDir)" />-->
+<!--    </Target>-->
 </Project>
