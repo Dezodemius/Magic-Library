@@ -5,7 +5,7 @@ namespace Library.Entity
   /// <summary>
   /// Книга.
   /// </summary>
-  public class Book : IEquatable<Book>
+  public class Book
   {
     #region Свойства
     
@@ -21,38 +21,6 @@ namespace Library.Entity
 
     #endregion
 
-    #region IEquatable
-
-    public override bool Equals(object obj)
-    {
-      if (ReferenceEquals(null, obj)) 
-        return false;
-      if (ReferenceEquals(this, obj)) 
-        return true;
-      if (obj.GetType() != GetType()) 
-        return false;
-      return Equals((Book) obj);
-    }
-
-    public bool Equals(Book other)
-    {
-      if (ReferenceEquals(null, other)) 
-        return false;
-      if (ReferenceEquals(this, other)) 
-        return true;
-      return Id == other.Id && Name == other.Name;
-    }
-
-    public override int GetHashCode()
-    {
-      unchecked
-      {
-        return Id.GetHashCode() + Name.GetHashCode();
-      }
-    }
-    
-    #endregion
-    
     #region Конструкторы
 
     /// <summary>

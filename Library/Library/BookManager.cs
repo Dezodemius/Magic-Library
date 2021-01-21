@@ -55,7 +55,8 @@ namespace Library
     /// Копировать книгу в Книжную полку.
     /// </summary>
     /// <param name="bookPath">Путь к книге.</param>
-    public void AddBook(string bookPath)
+    /// <param name="bookId">Guid книги.</param>
+    public void AddBook(string bookPath, Guid bookId)
     {
       try
       {
@@ -64,7 +65,7 @@ namespace Library
         if (!File.Exists(bookNewPath))
         {
           File.Copy(filePath.FullName, bookNewPath);
-          SerializeBook(bookNewPath);
+          SerializeBook(bookNewPath, bookId);
         }
         else
         {
@@ -82,9 +83,10 @@ namespace Library
     /// Сериализовать книгу в файл.
     /// </summary>
     /// <param name="bookPath">Путь к файлу для сериализации.</param>
-    private static void SerializeBook(string bookPath)
+    /// <param name="bookId">Guid книги.</param>
+    private static void SerializeBook(string bookPath, Guid bookId)
     {
-      var bookEntityForSerializing = new Book(Guid.NewGuid(), Path.GetFileNameWithoutExtension(bookPath));
+      var bookEntityForSerializing = new Book(bookId, Path.GetFileNameWithoutExtension(bookPath));
 
       var serializedBookDestinationPath = Path.Combine((new FileInfo(bookPath)).DirectoryName ?? string.Empty,
         Path.GetFileNameWithoutExtension(bookPath) + BookDataExtension);

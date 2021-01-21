@@ -42,12 +42,16 @@ namespace Library.Utils
     
     #region Поля и свойства
 
+    #region Singltone
+
     private static ElasticProvider _instance;
 
     /// <summary>
     /// Экземпляр ElasticProvider.
     /// </summary>
     public static ElasticProvider Instance => _instance ??= new ElasticProvider();
+
+    #endregion
 
     /// <summary>
     /// Экземпляр клиента Elasticsearch.
@@ -216,26 +220,12 @@ namespace Library.Utils
     /// <returns>Результат поиска.</returns>
     public ISearchResponse<Page> Search(string searchPhrase)
     {
-      using (var client = new HttpClient())
-      {
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        var request = new HttpRequestMessage(HttpMethod.Get, @"http://localhost:9200/pages/_search/")
-        {
-          Content = new StringContent(@"{
-        ""query"": {
-          ""match"": {""attachment.content"" : ""enhanced""}
-        },
-        ""highlight"": {""fields"" : {""attachment.content"" : {}, ""bookId"" : {}}}
-      }")
-        };
-        var response1 = client.SendAsync(request);
-        var a = response1.Result;
-      }
       ISearchResponse<Page> response;
       try
       {
         _log.Debug($"Searching: {searchPhrase} in index: {PagesIndexName}");
-        response = Client.Search<Page>(s => s.Index(Indices.Index(PagesIndexName))
+        response = Client.Search<Page>(s => s.Index(Indices.Parse(PagesIndexName))
+          .StoredFields(s => s.Field(f => f.BookId).Field(f => f.Number))
           .Query(q => q
             .Match(c => c
               .Field(f =>  f.Attachment.Content)
@@ -257,7 +247,11 @@ namespace Library.Utils
     /// <returns>Список всех сущностей в индексе.</returns>
     public IEnumerable<Book> GetAllBooks()
     {
-      var response = Client.Search<Book>(s => s.Query(q => q.MatchAll()));
+      var searchRequest = new SearchRequest<Book>(Indices.Parse(BooksIndexName))
+      {
+        Query = new QueryContainer(new MatchAllQuery())
+      };
+      var response = Client.Search<Book>(searchRequest);
       _log.Debug($"Search all. Found {response.Documents.Count} documents.");
       return response.Documents;
     }
@@ -352,8 +346,13 @@ namespace Library.Utils
         Client.Indices.Create(Indices.Index(PagesIndexName),
           i => i
             .Map<Page>(m => m
-              .AutoMap()
-              ));
+              .Properties(ps => ps
+                .Number(n => n.Name(na => na.Number).Store())
+                .Keyword(k => k.Name(n => n.BookId).Store())
+                .Object<Attachment>(o => o
+                  .Name(n => n.Attachment)
+                  .AutoMap()))
+                ));
 
         _log.Info($"Index {PagesIndexName} created.");
       }

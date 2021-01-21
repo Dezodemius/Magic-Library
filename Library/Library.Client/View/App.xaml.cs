@@ -23,7 +23,8 @@ namespace Library.Client.View
     private void App_OnStartup(object sender, StartupEventArgs e)
     {
       ViewService.OpenViewModel(new MainWindowViewModel());
-      ElasticSynchronizer.SynchronizeWithDisk();
+      // TODO: В скором времени нужно будет включить обратно эту синхронизацию.
+      // ElasticSynchronizer.SynchronizeWithDisk();
     }
 
     /// <summary>

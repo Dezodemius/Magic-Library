@@ -31,7 +31,8 @@ namespace Library.Utils
       using var pdfDocument = new PdfDocument(pdfPath);
       for (var i = 0; i < pdfDocument.PageCount; i++)
       {
-        var pageTextBytes = Encoding.UTF8.GetBytes(pdfDocument.Pages[i].GetText());
+        var text = pdfDocument.Pages[i].GetText();
+        var pageTextBytes = Encoding.UTF8.GetBytes(text);
         var pageTextInBase64 = Convert.ToBase64String(pageTextBytes);
 
         pages.Add(new Page(i + 1, bookId, pageTextInBase64));

@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using Library.Client.Utils;
 using Library.Entity;
 using Library.Utils;
 using Microsoft.Win32;
+using Nest;
 
 namespace Library.Client.ViewModel
 {
@@ -91,14 +93,14 @@ namespace Library.Client.ViewModel
     {
       if (string.IsNullOrEmpty(SearchPhrase))
         return;
-      var documents = ElasticProvider.Instance.Search(SearchPhrase).Documents;
-
-      UpdateMessageTextBox($"Найдено экземпляров: {documents.Count}");
+      var searchResponse = ElasticProvider.Instance.Search(SearchPhrase);
+      var booksId = searchResponse.Fields.Select(b => b.Value<Guid>(new Field("bookId"))).Distinct().ToList();
+      UpdateMessageTextBox($"Найдено экземпляров: {booksId.Count}");
 
       FoundedBooks.Clear();
-      foreach (var page in documents)
+      foreach (var bookId in booksId)
       {
-        var book = BookManager.Instance.GetBook(page.BookId);
+        var book = BookManager.Instance.GetBook(bookId);
         FoundedBooks.Add(book);
       }
     }
@@ -146,8 +148,9 @@ namespace Library.Client.ViewModel
       var booksForIndexing = new List<Book>();
       foreach (var pathToFile in openFileDialog.FileNames)
       {
-        BookManager.Instance.AddBook(pathToFile);
-        var book = new Book(Guid.NewGuid(), Path.GetFileNameWithoutExtension(pathToFile));
+        var bookId = Guid.NewGuid();
+        BookManager.Instance.AddBook(pathToFile, bookId);
+        var book = new Book(bookId, Path.GetFileNameWithoutExtension(pathToFile));
 
         booksForIndexing.Add(book);
         AppendToMessageTextBox($"{book.Name} успешно добавлена");
