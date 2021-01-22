@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using System.Windows.Threading;
 using Library.Client.Utils;
 using Library.Client.ViewModel;
@@ -22,7 +23,8 @@ namespace Library.Client.View
     private void App_OnStartup(object sender, StartupEventArgs e)
     {
       ViewService.OpenViewModel(new MainWindowViewModel());
-      ElasticSynchronizer.SynchronizeWithDisk();
+      // TODO: В скором времени нужно будет включить обратно эту синхронизацию.
+      // ElasticSynchronizer.SynchronizeWithDisk();
     }
 
     /// <summary>

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Library.Entity;
 using NLog;
@@ -21,20 +23,25 @@ namespace Library.Utils
     public static void SynchronizeWithDisk()
     {
       var booksOnDisk = BookManager.Instance.GetAllBooks();
-      var booksInIndex = ElasticProvider.Instance.GetAll();
+      var booksInIndex = ElasticProvider.Instance.GetAllBooks();
 
       var booksOnlyOnDisk = booksOnDisk.Except(booksInIndex.ToList());
       if (booksOnlyOnDisk.Any())
       {
-        Log.Debug($"The number of books contained on disk but not indexed: {booksOnlyOnDisk.Count(b => b.Id > 0)}");
+        Log.Debug($"The number of books contained on disk but not indexed: {booksOnlyOnDisk.Count(b => b.Id != Guid.Empty)}");
         ElasticProvider.Instance.BulkIndex(booksOnlyOnDisk);
+        foreach (var book in booksOnlyOnDisk)
+        {
+          var bookPages = ElasticProvider.Instance.GetAllPages(book.Id);
+          ElasticProvider.Instance.BulkIndex(bookPages);
+        }
         Log.Info("Missing books have been indexed.");
       }
 
       var booksOnlyInIndex = booksInIndex.Except(booksOnDisk).ToList();
       if (booksOnlyInIndex.Any())
       {
-        Log.Debug($"The number of books contained in the index but not on disk: {booksOnlyOnDisk.Count(b => b.Id > 0)}");
+        Log.Debug($"The number of books contained in the index but not on disk: {booksOnlyOnDisk.Count(b => b.Id != Guid.Empty)}");
         ElasticProvider.Instance.BulkDelete(booksOnlyInIndex);
         Log.Info("Extra books have been deleted from disk.");
       }

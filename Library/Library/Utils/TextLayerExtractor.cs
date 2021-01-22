@@ -1,7 +1,9 @@
-﻿using System.Text;
-using iTextSharp.text.pdf;
-using iTextSharp.text.pdf.parser;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Library.Entity;
 using NLog;
+using PdfDocument = BitMiracle.Docotic.Pdf.PdfDocument;
 
 namespace Library.Utils
 {
@@ -14,25 +16,28 @@ namespace Library.Utils
     /// Логгер класса.
     /// </summary>
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-    
-    /// <summary>
-    /// Извлечь текст PDF-документа.
-    /// </summary>
-    /// <param name="pdfPath">Имя файла.</param>
-    /// <returns>Текстовый слой.</returns>
-    public static string ExtractTextLayer(string pdfPath)
-    {
-      using var pdfReader = new PdfReader(pdfPath);
-      
-      Log.Debug($"Filename: {pdfPath}; Number of pages: {pdfReader.NumberOfPages}");
-      
-      var text = new StringBuilder();
-      var strategy = new SimpleTextExtractionStrategy();
 
-      for (var i = 1; i < pdfReader.NumberOfPages; i++)
-        text.Append(PdfTextExtractor.GetTextFromPage(pdfReader, i, strategy));
+    /// <summary>
+    /// Получить список страниц с их текстом в base64.
+    /// </summary>
+    /// <param name="pdfPath">Путь к файлу.</param>
+    /// <param name="bookId">ИД книги, к которой пренадлежит страница.</param>
+    /// <returns>Список страниц.</returns>
+    public static IEnumerable<Page> GetTextLayerWithPages(string pdfPath, Guid bookId)
+    {
+      var pages = new List<Page>();
       
-      return text.ToString();
+      using var pdfDocument = new PdfDocument(pdfPath);
+      for (var i = 0; i < pdfDocument.PageCount; i++)
+      {
+        var text = pdfDocument.Pages[i].GetText();
+        var pageTextBytes = Encoding.UTF8.GetBytes(text);
+        var pageTextInBase64 = Convert.ToBase64String(pageTextBytes);
+
+        pages.Add(new Page(i + 1, bookId, pageTextInBase64));
+      }
+
+      return pages;
     }
   }
 }

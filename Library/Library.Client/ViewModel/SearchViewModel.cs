@@ -1,11 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using Library.Client.Utils;
 using Library.Entity;
 using Library.Utils;
 using Microsoft.Win32;
+using Nest;
 
 namespace Library.Client.ViewModel
 {
@@ -18,7 +20,7 @@ namespace Library.Client.ViewModel
 
     public override string Name { get; } = "Поиск";
 
-    public ObservableCollection<Book> FoundedBooks { get; set; } = new ObservableCollection<Book>();
+    public ObservableCollection<BookWithPages> FoundedBooks { get; set; } = new ObservableCollection<BookWithPages>();
 
     private string _message;
 
@@ -89,13 +91,27 @@ namespace Library.Client.ViewModel
 
     private void Search(object obj)
     {
-      var documents = ElasticProvider.Instance.Search(SearchPhrase).Documents;
-
-      UpdateMessageTextBox($"Найдено экземпляров: {documents.Count}");
+      if (string.IsNullOrEmpty(SearchPhrase))
+        return;
+      var searchResponse = ElasticProvider.Instance.Search(SearchPhrase);
+      var booksWithPages = new Dictionary<Guid, List<float>>();
+      foreach (var field in searchResponse.Fields)
+      {
+        var bookId = field.Value<Guid>(new Field("bookId"));
+        var page = field.Value<float>(new Field("number"));
+        if (!booksWithPages.ContainsKey(bookId))
+          booksWithPages.Add(bookId, new List<float>());
+        booksWithPages[bookId].Add(page);
+      }
+      UpdateMessageTextBox($"Найдено экземпляров: {booksWithPages.Count}");
 
       FoundedBooks.Clear();
-      foreach (var result in documents)
-        FoundedBooks.Add(result);
+      foreach (var bookId in booksWithPages.Keys)
+      {
+        var book = BookManager.Instance.GetBook(bookId);
+        var pages = string.Join(", ", booksWithPages[bookId]);
+        FoundedBooks.Add(new BookWithPages(book, pages));
+      }
     }
 
     /// <summary>
@@ -141,12 +157,15 @@ namespace Library.Client.ViewModel
       var booksForIndexing = new List<Book>();
       foreach (var pathToFile in openFileDialog.FileNames)
       {
-        BookManager.Instance.AddBook(pathToFile);
-        var book = new Book(BookManager.GetNextId(), Path.GetFileNameWithoutExtension(pathToFile),
-          TextLayerExtractor.ExtractTextLayer(pathToFile));
+        var bookId = Guid.NewGuid();
+        BookManager.Instance.AddBook(pathToFile, bookId);
+        var book = new Book(bookId, Path.GetFileNameWithoutExtension(pathToFile));
 
         booksForIndexing.Add(book);
         AppendToMessageTextBox($"{book.Name} успешно добавлена");
+    
+        var pages = TextLayerExtractor.GetTextLayerWithPages(pathToFile, book.Id);
+        ElasticProvider.Instance.BulkIndex(pages);
       }
 
       ElasticProvider.Instance.BulkIndex(booksForIndexing);
@@ -165,11 +184,11 @@ namespace Library.Client.ViewModel
 
     private void GetAllBooks(object obj)
     {
-      var foundedBooks = ElasticProvider.Instance.GetAll();
+      var foundedBooks = ElasticProvider.Instance.GetAllBooks();
 
       FoundedBooks.Clear();
       foreach (var book in foundedBooks)
-        FoundedBooks.Add(book);
+        FoundedBooks.Add(new BookWithPages(book, string.Empty));
     }
 
     private static bool DeleteBookCanExecute(object arg)

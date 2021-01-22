@@ -43,11 +43,6 @@ namespace Library
     public DirectoryInfo BookShelfPath { get; private set; }
 
     /// <summary>
-    /// Счётчик книг в библиотеке.
-    /// </summary>
-    public static int BooksCounter => ElasticProvider.Instance.GetBooksCount();
-
-    /// <summary>
     /// Логгер класса.
     /// </summary>
     private static readonly Logger Log  = LogManager.GetCurrentClassLogger();
@@ -60,7 +55,8 @@ namespace Library
     /// Копировать книгу в Книжную полку.
     /// </summary>
     /// <param name="bookPath">Путь к книге.</param>
-    public void AddBook(string bookPath)
+    /// <param name="bookId">Guid книги.</param>
+    public void AddBook(string bookPath, Guid bookId)
     {
       try
       {
@@ -69,7 +65,7 @@ namespace Library
         if (!File.Exists(bookNewPath))
         {
           File.Copy(filePath.FullName, bookNewPath);
-          SerializeBook(bookNewPath);
+          SerializeBook(bookNewPath, bookId);
         }
         else
         {
@@ -87,10 +83,10 @@ namespace Library
     /// Сериализовать книгу в файл.
     /// </summary>
     /// <param name="bookPath">Путь к файлу для сериализации.</param>
-    private static void SerializeBook(string bookPath)
+    /// <param name="bookId">Guid книги.</param>
+    private static void SerializeBook(string bookPath, Guid bookId)
     {
-      var bookEntityForSerializing = new Book(GetNextId(), Path.GetFileNameWithoutExtension(bookPath),
-        TextLayerExtractor.ExtractTextLayer(bookPath));
+      var bookEntityForSerializing = new Book(bookId, Path.GetFileNameWithoutExtension(bookPath));
 
       var serializedBookDestinationPath = Path.Combine((new FileInfo(bookPath)).DirectoryName ?? string.Empty,
         Path.GetFileNameWithoutExtension(bookPath) + BookDataExtension);
@@ -147,12 +143,27 @@ namespace Library
     }
 
     /// <summary>
-    /// Получить новый Id для сущности.
+    /// Получить книгу по её ИД.
     /// </summary>
-    /// <returns>Id.</returns>
-    public static int GetNextId()
+    /// <param name="bookId">Guid книги.</param>
+    /// <returns>Экземпляр книги.</returns>
+    public Book GetBook(Guid bookId)
     {
-      return BooksCounter + 1;
+      foreach (var pdfFile in BookShelfPath.GetFiles("*.pdf"))
+      {
+        foreach (var bookDataFile in BookShelfPath.GetFiles($"*{BookDataExtension}"))
+        {
+          if (Path.GetFileNameWithoutExtension(pdfFile.Name) == Path.GetFileNameWithoutExtension(bookDataFile.Name))
+          {
+            using var reader = new StreamReader(bookDataFile.FullName);
+            var book = JsonConvert.DeserializeObject<Book>(reader.ReadToEnd());
+            if (book.Id == bookId)
+              return book;
+          }
+        }
+      }
+
+      return null;
     }
     
     /// <summary>
