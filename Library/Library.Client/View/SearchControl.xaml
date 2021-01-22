@@ -25,7 +25,7 @@
                                         Converter={StaticResource IndexConverter}}"
                                         Width="30">№</GridViewColumn>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Width="200">Название</GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Pages}" Width="100">Страницы</GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Pages}" Width="Auto">Страницы</GridViewColumn>
                     </GridView>
                 </ListView.View>
                 <ListView.ContextMenu>
@@ -42,7 +42,7 @@
                 </ListView.ContextMenu>
             </ListView>
         </ScrollViewer>
-        <ScrollViewer CanContentScroll="True" Height="70" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer CanContentScroll="True" Height="70" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
             <TextBox MinHeight="55" 
                      Margin="5 10 5 0" 
                      Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" 

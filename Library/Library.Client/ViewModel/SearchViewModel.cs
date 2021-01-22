@@ -109,6 +109,11 @@ namespace Library.Client.ViewModel
       foreach (var bookId in booksWithPages.Keys)
       {
         var book = BookManager.Instance.GetBook(bookId);
+        if (book == null)
+        {
+          UpdateMessageTextBox($"Не удалось найти книгу с ИД: {bookId}.\nВозможно, отсутствует локальный экземпляр книги");
+          continue;          
+        }
         var pages = string.Join(", ", booksWithPages[bookId]);
         FoundedBooks.Add(new BookWithPages(book, pages));
       }
