@@ -20,7 +20,7 @@ namespace Library.Client.ViewModel
 
     public override string Name { get; } = "Поиск";
 
-    public ObservableCollection<Book> FoundedBooks { get; set; } = new ObservableCollection<Book>();
+    public ObservableCollection<BookWithPages> FoundedBooks { get; set; } = new ObservableCollection<BookWithPages>();
 
     private string _message;
 
@@ -94,14 +94,23 @@ namespace Library.Client.ViewModel
       if (string.IsNullOrEmpty(SearchPhrase))
         return;
       var searchResponse = ElasticProvider.Instance.Search(SearchPhrase);
-      var booksId = searchResponse.Fields.Select(b => b.Value<Guid>(new Field("bookId"))).Distinct().ToList();
-      UpdateMessageTextBox($"Найдено экземпляров: {booksId.Count}");
+      var booksWithPages = new Dictionary<Guid, List<float>>();
+      foreach (var field in searchResponse.Fields)
+      {
+        var bookId = field.Value<Guid>(new Field("bookId"));
+        var page = field.Value<float>(new Field("number"));
+        if (!booksWithPages.ContainsKey(bookId))
+          booksWithPages.Add(bookId, new List<float>());
+        booksWithPages[bookId].Add(page);
+      }
+      UpdateMessageTextBox($"Найдено экземпляров: {booksWithPages.Count}");
 
       FoundedBooks.Clear();
-      foreach (var bookId in booksId)
+      foreach (var bookId in booksWithPages.Keys)
       {
         var book = BookManager.Instance.GetBook(bookId);
-        FoundedBooks.Add(book);
+        var pages = string.Join(", ", booksWithPages[bookId]);
+        FoundedBooks.Add(new BookWithPages(book, pages));
       }
     }
 
@@ -179,7 +188,7 @@ namespace Library.Client.ViewModel
 
       FoundedBooks.Clear();
       foreach (var book in foundedBooks)
-        FoundedBooks.Add(book);
+        FoundedBooks.Add(new BookWithPages(book, string.Empty));
     }
 
     private static bool DeleteBookCanExecute(object arg)

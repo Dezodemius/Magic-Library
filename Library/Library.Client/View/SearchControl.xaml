@@ -24,7 +24,8 @@
                         <GridViewColumn DisplayMemberBinding="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}, 
                                         Converter={StaticResource IndexConverter}}"
                                         Width="30">№</GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Width="300">Название</GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Width="200">Название</GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Pages}" Width="100">Страницы</GridViewColumn>
                     </GridView>
                 </ListView.View>
                 <ListView.ContextMenu>
