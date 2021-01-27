@@ -23,8 +23,7 @@ namespace Library.Client.View
     private void App_OnStartup(object sender, StartupEventArgs e)
     {
       ViewService.OpenViewModel(new MainWindowViewModel());
-      // TODO: В скором времени нужно будет включить обратно эту синхронизацию.
-      // ElasticSynchronizer.SynchronizeWithDisk();
+      ElasticSynchronizer.SynchronizeWithDisk();
     }
 
     /// <summary>
@@ -34,7 +33,7 @@ namespace Library.Client.View
     /// <param name="e">Параметр обработчика.</param>
     private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-      var message = $"{e.Exception}\n{e.Exception.Message}";
+      var message = $"{e.Exception.Message}";
       _log.Error(message);
       MessageBox.Show(message, "Возникло исключение", MessageBoxButton.OK, MessageBoxImage.Error);
       e.Handled = true;

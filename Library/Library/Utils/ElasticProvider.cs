@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using Library.Entity;
 using Library.Resources;
 using Nest;
@@ -139,8 +137,7 @@ namespace Library.Utils
     {
       var indexResponse = Client
         .Index(book, i => i
-          .Index(Indices.Index(BooksIndexName))
-          .Pipeline(PipelineAttachmentName));
+          .Index(Indices.Index(BooksIndexName)));
       
       _log.Debug($"{book.Name} is indexed: {indexResponse.IsValid}.");
     }
@@ -225,7 +222,7 @@ namespace Library.Utils
       {
         _log.Debug($"Searching: {searchPhrase} in index: {PagesIndexName}");
         response = Client.Search<Page>(s => s.Index(Indices.Parse(PagesIndexName))
-          .StoredFields(s => s.Field(f => f.BookId).Field(f => f.Number))
+          .StoredFields(sf => sf.Field(f => f.BookId).Field(f => f.Number))
           .Query(q => q
             .Match(c => c
               .Field(f =>  f.Attachment.Content)
@@ -304,14 +301,43 @@ namespace Library.Utils
     /// </summary>
     /// <param name="book">Экземпляр книги.</param>
     /// <returns>True, если книга удалена успешно.</returns>
-    public bool DeleteBook(Book book)
+    public bool DeleteBookWithPages(Book book)
     {
-      var response = Client.DeleteByQuery<Book>(q => q
+      var bookDeletedResponse = DeleteBook(book);
+      var pagesDeletedSuccessfully = DeletePages(book);
+      return bookDeletedResponse && pagesDeletedSuccessfully;
+    }
+
+    /// <summary>
+    /// Удалить страницы книги.
+    /// </summary>
+    /// <param name="book">Книга, страницы которой необходимо удалить.</param>
+    /// <returns><c>True</c>, если удалены все страницы книги.</returns>
+    private bool DeletePages(Book book)
+    {
+      var pagesDeletedResponse = Client.DeleteByQuery<Page>(q => q
+        .Index(Indices.Parse(PagesIndexName))
+        .Query(rq => rq
+          .Term(f => f.BookId, book.Id)));
+      var pagesDeletedSuccessfully = pagesDeletedResponse.Deleted != 0;
+      _log.Debug($"Pages from {book.Name} deleted: {pagesDeletedSuccessfully}");
+      return pagesDeletedSuccessfully;
+    }
+
+    /// <summary>
+    /// Удалить книгу.
+    /// </summary>
+    /// <param name="book">Книга, которую необходимо удалить.</param>
+    /// <returns><c>True</c>, книга удалена.</returns>
+    private bool DeleteBook(Book book)
+    {
+      var bookDeletedResponse = Client.DeleteByQuery<Book>(q => q
+        .Index(Indices.Parse(BooksIndexName))
         .Query(rq => rq
           .Term(f => f.Id, book.Id)));
-      
-      _log.Debug($"Book {book.Name} deleted: {response.IsValid}");
-      return response.IsValid;
+      var bookDeletedSuccessfully = bookDeletedResponse.Deleted != 0; 
+      _log.Debug($"Book {book.Name} deleted: {bookDeletedSuccessfully}");
+      return bookDeletedSuccessfully;
     }
 
     #endregion

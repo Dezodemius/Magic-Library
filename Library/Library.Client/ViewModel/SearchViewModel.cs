@@ -109,6 +109,8 @@ namespace Library.Client.ViewModel
       foreach (var bookId in booksWithPages.Keys)
       {
         var book = BookManager.Instance.GetBook(bookId);
+        if (book == null)
+          throw new NullReferenceException($"Book with ID {bookId} does not exist localy.");
         var pages = string.Join(", ", booksWithPages[bookId]);
         FoundedBooks.Add(new BookWithPages(book, pages));
       }
@@ -210,7 +212,7 @@ namespace Library.Client.ViewModel
 
         if (BookManager.Instance.DeleteBook(book.Name))
           messageText += $"{book.Name} - успешно удалена с диска.\n";
-        if (ElasticProvider.Instance.DeleteBook(book))
+        if (ElasticProvider.Instance.DeleteBookWithPages(book))
           messageText += $"{book.Name} - успешно удалена с индекса.\n";
 
         AppendToMessageTextBox(messageText);

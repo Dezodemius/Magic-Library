@@ -25,25 +25,50 @@ namespace Library.Utils
       var booksOnDisk = BookManager.Instance.GetAllBooks();
       var booksInIndex = ElasticProvider.Instance.GetAllBooks();
 
-      var booksOnlyOnDisk = booksOnDisk.Except(booksInIndex.ToList());
+      var booksOnlyOnDisk =  booksOnDisk.Except(booksInIndex.ToList(), new BookEqualityComparer());
       if (booksOnlyOnDisk.Any())
       {
         Log.Debug($"The number of books contained on disk but not indexed: {booksOnlyOnDisk.Count(b => b.Id != Guid.Empty)}");
-        ElasticProvider.Instance.BulkIndex(booksOnlyOnDisk);
+        
         foreach (var book in booksOnlyOnDisk)
         {
-          var bookPages = ElasticProvider.Instance.GetAllPages(book.Id);
+          ElasticProvider.Instance.Index(book);
+          var bookPages = TextLayerExtractor.GetTextLayerWithPages($"{BookManager.Instance.BookShelfPath}/{book.Name}.pdf", book.Id);
           ElasticProvider.Instance.BulkIndex(bookPages);
         }
         Log.Info("Missing books have been indexed.");
       }
 
-      var booksOnlyInIndex = booksInIndex.Except(booksOnDisk).ToList();
+      var booksOnlyInIndex = booksInIndex.Except(booksOnDisk, new BookEqualityComparer()).ToList();
       if (booksOnlyInIndex.Any())
       {
         Log.Debug($"The number of books contained in the index but not on disk: {booksOnlyOnDisk.Count(b => b.Id != Guid.Empty)}");
-        ElasticProvider.Instance.BulkDelete(booksOnlyInIndex);
+        foreach (var book in booksOnlyInIndex)
+          ElasticProvider.Instance.DeleteBookWithPages(book);
         Log.Info("Extra books have been deleted from disk.");
+      }
+    }
+  }
+
+  /// <summary>
+  /// Компаратор для книг.
+  /// </summary>
+  internal class BookEqualityComparer : IEqualityComparer<Book>
+  {
+    public bool Equals(Book x, Book y)
+    {
+      if (ReferenceEquals(x, y)) return true;
+      if (ReferenceEquals(x, null)) return false;
+      if (ReferenceEquals(y, null)) return false;
+      if (x.GetType() != y.GetType()) return false;
+      return x.Id.Equals(y.Id) && x.Name == y.Name;
+    }
+
+    public int GetHashCode(Book obj)
+    {
+      unchecked
+      {
+        return (obj.Id.GetHashCode() * 397) ^ (obj.Name != null ? obj.Name.GetHashCode() : 0);
       }
     }
   }
