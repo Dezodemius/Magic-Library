@@ -150,7 +150,8 @@ namespace Library.Client.ViewModel
       var openFileDialog = new OpenFileDialog
       {
         Title = "Выберите файлы для индексации",
-        Filter = "Книги (*.PDF)|*.PDF"
+        Filter = "Книги (*.PDF)|*.PDF",
+        Multiselect = true
       };
 
       if (openFileDialog.ShowDialog() != true)
