@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Library.Entity;
@@ -31,6 +31,7 @@ namespace Library.Utils
       for (var i = 0; i < pdfDocument.PageCount; i++)
       {
         var text = pdfDocument.Pages[i].GetText();
+        text = text.Normalize(NormalizationForm.FormKC);
         var pageTextBytes = Encoding.UTF8.GetBytes(text);
         var pageTextInBase64 = Convert.ToBase64String(pageTextBytes);
 
