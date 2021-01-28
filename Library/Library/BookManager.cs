@@ -169,14 +169,18 @@ namespace Library
     /// <summary>
     /// Проверить, что книга существует в библиотеке.
     /// </summary>
-    /// <param name="bookName"></param>
+    /// <param name="book">Книга, которую хочется удалить.</param>
     /// <returns>True, если в папке с книгами есть книга с таким же именем</returns>
-    public bool IsBookExisted(string bookName)
+    public bool IsBookExisted(Book book)
     {
       foreach (var file in BookShelfPath.GetFiles())
       {
-        if (Path.GetFileNameWithoutExtension(file.FullName) == bookName)
-          return true;
+        if (Path.GetFileNameWithoutExtension(file.FullName) == book.Name)
+        {
+          var bookFromShelf = JsonConvert.DeserializeObject<Book>(File.ReadAllText(file.FullName));
+          if (book.Id == bookFromShelf.Id)
+            return true;
+        }
       }
 
       return false;

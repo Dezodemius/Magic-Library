@@ -150,7 +150,8 @@ namespace Library.Client.ViewModel
       var openFileDialog = new OpenFileDialog
       {
         Title = "Выберите файлы для индексации",
-        Filter = "Книги (*.PDF)|*.PDF"
+        Filter = "Книги (*.PDF)|*.PDF",
+        Multiselect = true
       };
 
       if (openFileDialog.ShowDialog() != true)
@@ -195,7 +196,9 @@ namespace Library.Client.ViewModel
 
     private static bool DeleteBookCanExecute(object arg)
     {
-      return BookManager.Instance.IsBookExisted((arg as Book)?.Name);
+      if (arg is Book book)
+        return BookManager.Instance.IsBookExisted(book);
+      return false;
     }
 
     /// <summary>
@@ -226,7 +229,9 @@ namespace Library.Client.ViewModel
     /// <returns>True, если возможно.</returns>
     private static bool OpenBookCanExecute(object arg)
     {
-      return BookManager.Instance.IsBookExisted((arg as Book)?.Name);
+      if (arg is Book book)
+        return BookManager.Instance.IsBookExisted(book);
+      return false;
     }
 
     /// <summary>
