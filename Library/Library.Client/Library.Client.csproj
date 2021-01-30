@@ -13,6 +13,7 @@
         <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
         <WarningLevel>4</WarningLevel>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <LangVersion>8</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -55,6 +56,7 @@
         <Reference Include="System.IO.Compression" />
         <Reference Include="System.Runtime.Serialization" />
         <Reference Include="System.ServiceModel" />
+        <Reference Include="System.ServiceProcess" />
         <Reference Include="System.Transactions" />
         <Reference Include="System.Xml" />
         <Reference Include="System.Xaml">
@@ -65,7 +67,9 @@
         <Reference Include="PresentationFramework" />
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="Settings\ApplicationSettings.cs" />
         <Compile Include="Utils\DelegateCommand.cs" />
+        <Compile Include="Utils\ElasticsearchServiceManager.cs" />
         <Compile Include="Utils\ViewService.cs" />
         <Compile Include="ViewModel\MainWindowViewModel.cs" />
         <Compile Include="ViewModel\SearchViewModel.cs" />
@@ -92,8 +96,8 @@
           <Link>NLog.config</Link>
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Include="App.config" />
         <None Include="packages.config" />
+        <None Include="Properties\App.config" />
     </ItemGroup>
     <ItemGroup>
       <Page Include="View\MainControl.xaml">
@@ -113,6 +117,9 @@
         <Generator>MSBuild:Compile</Generator>
         <SubType>Designer</SubType>
       </ApplicationDefinition>
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="App_Config.example" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 <!--    <Target Name="CopyNLogConfig" AfterTargets="AfterBuild">-->
