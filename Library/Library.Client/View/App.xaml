@@ -4,7 +4,8 @@
              xmlns:viewModel="clr-namespace:Library.Client.ViewModel"
              xmlns:view="clr-namespace:Library.Client.View"
              DispatcherUnhandledException="App_OnDispatcherUnhandledException"
-             Startup="App_OnStartup">
+             Startup="App_OnStartup"
+             Exit="App_OnExit">
     <Application.Resources>
         <DataTemplate DataType="{x:Type viewModel:SearchViewModel}">
             <view:SearchControl/>
