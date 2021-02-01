@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Configuration;
-using System.IO;
 
 namespace Library.Client.Settings
 {
@@ -9,55 +8,48 @@ namespace Library.Client.Settings
   /// </summary>
   public static class ApplicationSettings
   {
+    #region Свойства
+
     /// <summary>
     /// Признак необходимости запустить ES при старте.
     /// </summary>
-    internal static bool NeedRunElasticOnStartup
-    {
-      get
-      {
-        var defaultValue = bool.TrueString;
-        var settingValue = GetSetting("START_ELASTIC_ON_STARTUP");
-        return bool.Parse(settingValue ?? defaultValue);
-      }
-    }
+    internal static bool NeedRunElasticOnStartup => GetSetting<bool>("START_ELASTIC_ON_STARTUP", true);
 
     /// <summary>
     /// Признак необходимости закрыть ES после выхода из приложения.
     /// </summary>
-    internal static bool NeedCloseElasticOnExit
-    {
-      get
-      {
-        var defaultValue = bool.TrueString;
-        var settingValue = GetSetting("CLOSE_ELASTIC_ON_EXIT");
-        return bool.Parse(settingValue ?? defaultValue);
-      }
-    }
+    internal static bool NeedCloseElasticOnExit => GetSetting<bool>("CLOSE_ELASTIC_ON_EXIT", true);
 
     /// <summary>
     /// Путь, где находится сервис ES.
     /// </summary>
-    internal static FileInfo ElasticsearchAppFileInfo
-    {
-      get
-      {
-        var settingValue = GetSetting("ELASTICSEARCH_SERVICE_PATH");
-        if (settingValue == null)
-          throw new ArgumentException("Не задан путь к сервису Elasticsearch. " +
-                                      "Для указания пути используйте настойку ELASTICSEARCH_SERVICE_PATH");
-        return new FileInfo(settingValue);
-      }
-    }
+    internal static string ElasticsearchAppFileName => GetSetting<string>("ELASTICSEARCH_SERVICE_PATH", "../../elasticsearch-7.8.0/bin/elasticsearch-service.bat");
+
+    /// <summary>
+    /// Путь к логам приложения.
+    /// </summary>
+    internal static string LogFilename => GetSetting<string>("LOG_FILENAME", string.Empty);
+
+    #endregion
+
+    #region Методы
 
     /// <summary>
     /// Получить настройку из App.config.
     /// </summary>
     /// <param name="settingName">Имя настройки.</param>
-    /// <returns>Значение настройки. Имеет тип <c>string</c></returns>
-    private static string GetSetting(string settingName)
+    /// <param name="defaultValue">Значение по умолчанию.</param>
+    /// <typeparam name="T">Тип настройки.</typeparam>
+    /// <returns>Значение настройки.</returns>
+    private static T GetSetting<T>(string settingName, T defaultValue = default(T))
     {
-      return ConfigurationManager.AppSettings.Get(settingName);
+      var setting = ConfigurationManager.AppSettings.Get(settingName);
+      if (setting == null)
+        return defaultValue;
+      var convertedSetting = (T) Convert.ChangeType(setting, typeof(T));
+      return convertedSetting;
     }
+
+    #endregion
   }
 }

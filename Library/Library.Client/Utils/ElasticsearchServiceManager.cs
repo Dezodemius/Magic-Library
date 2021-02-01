@@ -102,7 +102,7 @@ namespace Library.Client.Utils
     {
       var elasticServiceProcessInfo = new ProcessStartInfo
       {
-        FileName = ApplicationSettings.ElasticsearchAppFileInfo.FullName,
+        FileName = ApplicationSettings.ElasticsearchAppFileName,
         UseShellExecute = false,
         CreateNoWindow = false,
         Arguments = "install"

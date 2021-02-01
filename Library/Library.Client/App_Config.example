@@ -8,7 +8,10 @@
         <add key="START_ELASTIC_ON_STARTUP" value="True" />
         <!--Признак закрытия ES при выходе из приложения-->
         <add key="CLOSE_ELASTIC_ON_EXIT" value="True"/>
-        
+
+        <!--Путь к файлу с логами.-->
+        <add key="LOG_FILENAME" value="./logs/library.log"/>
+
         <!--Путь к сервису ES-->
         <add key="ELASTICSEARCH_SERVICE_PATH" value="D:\elastic 7.8.0\elasticsearch-7.8.0\bin\elasticsearch-service.bat"/>
     </appSettings>

@@ -3,7 +3,7 @@
 namespace Library.Client.View
 {
   /// <summary>
-  /// Interaction logic for MainWindow.xaml
+  /// Логика взаимодействия для MainWindow.xaml.
   /// </summary>
   public partial class MainControl : UserControl
   {

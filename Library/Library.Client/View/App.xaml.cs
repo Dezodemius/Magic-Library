@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows;
@@ -9,26 +8,30 @@ using Library.Client.Utils;
 using Library.Client.ViewModel;
 using Library.Utils;
 using NLog;
+using NLog.Layouts;
+using NLog.Targets;
 
 namespace Library.Client.View
 {
   /// <summary>
-  /// Interaction logic for App.xaml
+  /// Логика взаимодействия для App.xaml.
   /// </summary>
   public partial class App
   {
+    #region Поля
+
     /// <summary>
     /// Логгер.
     /// </summary>
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-    
+
+    #endregion
+
+    #region Обработчики событий
+
     private void App_OnStartup(object sender, StartupEventArgs e)
     {
-      if (ApplicationSettings.NeedRunElasticOnStartup)
-      {
-        ElasticsearchServiceManager.Instance.EnsureElasticsearchServiceRun();
-        WaitRunPendingElasticsearch();
-      }
+      InitApplication();
 
       ElasticProvider.Instance.Initialize();
       ElasticSynchronizer.SynchronizeWithDisk();
@@ -41,7 +44,7 @@ namespace Library.Client.View
       if (ApplicationSettings.NeedCloseElasticOnExit)
         ElasticsearchServiceManager.Instance.StopElasticService();
     }
-    
+
     private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
       var message = $"{e.Exception.Message}";
@@ -50,6 +53,34 @@ namespace Library.Client.View
       e.Handled = true;
 
       Environment.Exit(-1);
+    }
+
+    #endregion
+
+    #region Методы
+
+    /// <summary>
+    /// Выполнить инициализацию приложения перед стартом.
+    /// </summary>
+    private static void InitApplication()
+    {
+      if (!string.IsNullOrEmpty(ApplicationSettings.LogFilename))
+        ConfigureLogs();
+      if (ApplicationSettings.NeedRunElasticOnStartup)
+      {
+        ElasticsearchServiceManager.Instance.EnsureElasticsearchServiceRun();
+        WaitRunPendingElasticsearch();
+      }
+    }
+
+    /// <summary>
+    /// Конфигурировать конфиг NLog.
+    /// </summary>
+    private static void ConfigureLogs()
+    {
+      var config = LogManager.Configuration;
+      ((FileTarget)LogManager.Configuration.FindTargetByName("file")).FileName = (Layout)ApplicationSettings.LogFilename;
+      LogManager.Configuration = config;
     }
 
     /// <summary>
@@ -74,5 +105,7 @@ namespace Library.Client.View
         }
       }
     }
+
+    #endregion
   }
 }
