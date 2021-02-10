@@ -66,6 +66,7 @@
         <Reference Include="PresentationFramework" />
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="Model\BookWithPages.cs" />
         <Compile Include="Settings\ApplicationSettings.cs" />
         <Compile Include="Utils\DelegateCommand.cs" />
         <Compile Include="Utils\ElasticsearchServiceManager.cs" />
@@ -117,7 +118,10 @@
       </ApplicationDefinition>
     </ItemGroup>
     <ItemGroup>
-      <Content Include="App_Config.example" />
+        <Content Include="Library.Client.exe.config.example">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+        </Content>
       <Content Include="Properties\App.manifest" />
       <SplashScreen Include="splashscreen.png">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
