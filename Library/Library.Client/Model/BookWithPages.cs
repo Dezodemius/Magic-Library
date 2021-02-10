@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
+using Library.Entity;
 
-namespace Library.Entity
+namespace Library.Client.Model
 {
   public class BookWithPages : Book
   {
