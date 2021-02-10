@@ -54,7 +54,7 @@ namespace Library.Utils
     /// <summary>
     /// Экземпляр клиента Elasticsearch.
     /// </summary>
-    private ElasticClient Client { get; }
+    private ElasticClient Client { get; set; }
 
     /// <summary>
     /// Логгер класса.
@@ -65,6 +65,22 @@ namespace Library.Utils
     
     #region Методы
 
+    public void Initialize()
+    {
+      CreateBooksIndex();
+      CreatePagesIndex();
+      
+      CheckRequiredPlugins();
+      PutPipeline();
+    }
+
+    public bool CheckElasticsearchConnection()
+    {
+      var pingResponse = Client.Ping();
+      _log.Debug(pingResponse.ApiCall.Success);
+      return pingResponse.ApiCall.Success;
+    }
+    
     #region Вспомогательные
     
     /// <summary>
@@ -402,12 +418,6 @@ namespace Library.Utils
         .ThrowExceptions();
       
       Client = new ElasticClient(settings);
-
-      CreateBooksIndex();
-      CreatePagesIndex();
-      
-      CheckRequiredPlugins();
-      PutPipeline();
     }
 
     #endregion

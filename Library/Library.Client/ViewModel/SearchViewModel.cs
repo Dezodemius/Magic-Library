@@ -2,28 +2,42 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using Library.Client.Utils;
 using Library.Entity;
 using Library.Utils;
 using Microsoft.Win32;
 using Nest;
+using NLog;
 
 namespace Library.Client.ViewModel
 {
   /// <summary>
-  /// ViewModel главного окна.
+  /// ViewModel поискового окна.
   /// </summary>
   public class SearchViewModel : ViewModel
   {
     #region Поля и свойства
 
+    /// <summary>
+    /// Логгер.
+    /// </summary>
+    private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
+    /// <summary>
+    /// Имя окна.
+    /// </summary>
     public override string Name { get; } = "Поиск";
 
+    /// <summary>
+    /// Коллекция найденных книг.
+    /// </summary>
     public ObservableCollection<BookWithPages> FoundedBooks { get; set; } = new ObservableCollection<BookWithPages>();
 
     private string _message;
 
+    /// <summary>
+    /// Сообщение.
+    /// </summary>
     public string Message
     {
       get => _message;
@@ -34,6 +48,9 @@ namespace Library.Client.ViewModel
       }
     }
 
+    /// <summary>
+    /// Поисковая фраза.
+    /// </summary>
     public static string SearchPhrase { get; set; }
 
     #endregion
@@ -84,11 +101,20 @@ namespace Library.Client.ViewModel
 
     #region Методы
 
+    /// <summary>
+    /// Возможность выполнения поиска.
+    /// </summary>
+    /// <param name="arg">Аргументы.</param>
+    /// <returns>Признак того, что поиск может выполняться.</returns>
     private bool SearchCanExecute(object arg)
     {
-      return true;
+      return ElasticProvider.Instance.CheckElasticsearchConnection();
     }
 
+    /// <summary>
+    /// Выполнить поиск.
+    /// </summary>
+    /// <param name="obj">Объект.</param>
     private void Search(object obj)
     {
       if (string.IsNullOrEmpty(SearchPhrase))
@@ -110,7 +136,7 @@ namespace Library.Client.ViewModel
       {
         var book = BookManager.Instance.GetBook(bookId);
         if (book == null)
-          throw new NullReferenceException($"Book with ID {bookId} does not exist localy.");
+          Log.Error($"Book with ID {bookId} does not exist localy.");
         var pages = string.Join(", ", booksWithPages[bookId]);
         FoundedBooks.Add(new BookWithPages(book, pages));
       }
@@ -141,9 +167,13 @@ namespace Library.Client.ViewModel
     /// <returns>True, если возможно.</returns>
     private static bool AddBookCanExecute(object arg)
     {
-      return true;
+      return ElasticProvider.Instance.CheckElasticsearchConnection();
     }
 
+    /// <summary>
+    /// Добавить книгу.
+    /// </summary>
+    /// <param name="obj">Объект.</param>
     private void AddBook(object obj)
     {
       UpdateMessageTextBox("Начало добавления книг");
@@ -185,6 +215,10 @@ namespace Library.Client.ViewModel
       return true;
     }
 
+    /// <summary>
+    /// Получить все книги.
+    /// </summary>
+    /// <param name="obj">Объект.</param>
     private void GetAllBooks(object obj)
     {
       var foundedBooks = ElasticProvider.Instance.GetAllBooks();
@@ -194,6 +228,11 @@ namespace Library.Client.ViewModel
         FoundedBooks.Add(new BookWithPages(book, string.Empty));
     }
 
+    /// <summary>
+    /// Проверить возможность выполнить удаление книги.
+    /// </summary>
+    /// <param name="arg">Аргумент.</param>
+    /// <returns>Признак того, что книгу можно удалить.</returns>
     private static bool DeleteBookCanExecute(object arg)
     {
       if (arg is Book book)

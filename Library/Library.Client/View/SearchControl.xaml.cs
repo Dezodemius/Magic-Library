@@ -5,6 +5,9 @@ using System.Windows.Data;
 
 namespace Library.Client.View
 {
+  /// <summary>
+  /// Логика взаимодействия для SearchControl.xaml.
+  /// </summary>
   public partial class SearchControl : UserControl
   {
     public SearchControl()
