@@ -54,7 +54,7 @@ namespace Library.Utils
     /// <summary>
     /// Экземпляр клиента Elasticsearch.
     /// </summary>
-    private ElasticClient Client { get; set; }
+    private ElasticClient Client { get; }
 
     /// <summary>
     /// Логгер класса.
@@ -65,6 +65,9 @@ namespace Library.Utils
     
     #region Методы
 
+    /// <summary>
+    /// Инициализация клиента для работы с ES.
+    /// </summary>
     public void Initialize()
     {
       CreateBooksIndex();
@@ -74,6 +77,56 @@ namespace Library.Utils
       PutPipeline();
     }
 
+    /// <summary>
+    /// Создать и настроить индекс /books.
+    /// </summary>
+    private void CreateBooksIndex()
+    {
+      if (!Client.Indices.Exists(Indices.Index(BooksIndexName)).Exists)
+      {
+        Client.Indices.Create(Indices.Index(BooksIndexName),
+          i => i
+            .Map<Book>(m => m
+              .AutoMap()));
+
+        _log.Info($"Index {BooksIndexName} created.");
+      }
+      else
+      {
+        _log.Info($"Index '{BooksIndexName}' already exists.");
+      }
+    }
+    
+    /// <summary>
+    /// Создать и настроить индекс /pages.
+    /// </summary>
+    private void CreatePagesIndex()
+    {
+      if (!Client.Indices.Exists(Indices.Parse(PagesIndexName)).Exists)
+      {
+        Client.Indices.Create(Indices.Index(PagesIndexName),
+          i => i
+            .Map<Page>(m => m
+              .Properties(ps => ps
+                .Number(n => n.Name(na => na.Number).Store())
+                .Keyword(k => k.Name(n => n.BookId).Store())
+                .Object<Attachment>(o => o
+                  .Name(n => n.Attachment)
+                  .AutoMap()))
+            ));
+
+        _log.Info($"Index {PagesIndexName} created.");
+      }
+      else
+      {
+        _log.Info($"Index '{PagesIndexName}' already exists.");
+      }
+    }
+    
+    /// <summary>
+    /// Проверить соединение с сервисом ES.
+    /// </summary>
+    /// <returns></returns>
     public bool CheckElasticsearchConnection()
     {
       var pingResponse = Client.Ping();
@@ -357,52 +410,6 @@ namespace Library.Utils
     }
 
     #endregion
-
-    /// <summary>
-    /// Создать и настроить индекс /books.
-    /// </summary>
-    private void CreateBooksIndex()
-    {
-      if (!Client.Indices.Exists(Indices.Index(BooksIndexName)).Exists)
-      {
-        Client.Indices.Create(Indices.Index(BooksIndexName),
-          i => i
-            .Map<Book>(m => m
-              .AutoMap()));
-
-        _log.Info($"Index {BooksIndexName} created.");
-      }
-      else
-      {
-        _log.Info($"Index '{BooksIndexName}' already exists.");
-      }
-    }
-    
-    /// <summary>
-    /// Создать и настроить индекс /pages.
-    /// </summary>
-    private void CreatePagesIndex()
-    {
-      if (!Client.Indices.Exists(Indices.Parse(PagesIndexName)).Exists)
-      {
-        Client.Indices.Create(Indices.Index(PagesIndexName),
-          i => i
-            .Map<Page>(m => m
-              .Properties(ps => ps
-                .Number(n => n.Name(na => na.Number).Store())
-                .Keyword(k => k.Name(n => n.BookId).Store())
-                .Object<Attachment>(o => o
-                  .Name(n => n.Attachment)
-                  .AutoMap()))
-                ));
-
-        _log.Info($"Index {PagesIndexName} created.");
-      }
-      else
-      {
-        _log.Info($"Index '{PagesIndexName}' already exists.");
-      }
-    }
     
     #endregion
 
