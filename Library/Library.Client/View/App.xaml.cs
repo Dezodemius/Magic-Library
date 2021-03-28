@@ -48,7 +48,7 @@ namespace Library.Client.View
     private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
       var message = $"{e.Exception.Message}";
-      Log.Error(message);
+      Log.Fatal($"{message}\n{e.Exception.StackTrace}");
       MessageBox.Show(message, "Возникло исключение", MessageBoxButton.OK, MessageBoxImage.Error);
       e.Handled = true;
 

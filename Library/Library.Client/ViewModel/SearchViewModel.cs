@@ -64,7 +64,7 @@ namespace Library.Client.ViewModel
     /// Команда поиска.
     /// </summary>
     public DelegateCommand SearchCommand =>
-      _searchCommand ?? (_searchCommand = new DelegateCommand(Search, SearchCanExecute));
+      _searchCommand ??= new DelegateCommand(Search, SearchCanExecute);
 
     private DelegateCommand _addBookCommand;
 
@@ -72,7 +72,7 @@ namespace Library.Client.ViewModel
     /// Команда добавления книги.
     /// </summary>
     public DelegateCommand AddBookCommand =>
-      _addBookCommand ?? (_addBookCommand = new DelegateCommand(AddBook, AddBookCanExecute));
+      _addBookCommand ??= new DelegateCommand(AddBook, AddBookCanExecute);
 
     private DelegateCommand _getAllBooksCommand;
 
@@ -80,7 +80,7 @@ namespace Library.Client.ViewModel
     /// Команда получения всех книг.
     /// </summary>
     public DelegateCommand GetAllBooksCommand =>
-      _getAllBooksCommand ?? (_getAllBooksCommand = new DelegateCommand(GetAllBooks, GetAllBooksCanExecute));
+      _getAllBooksCommand ??= new DelegateCommand(GetAllBooks, GetAllBooksCanExecute);
 
     private DelegateCommand _deleteBookCommand;
 
@@ -88,7 +88,7 @@ namespace Library.Client.ViewModel
     /// Команда удаления книги.
     /// </summary>
     public DelegateCommand DeleteBookCommand =>
-      _deleteBookCommand ?? (_deleteBookCommand = new DelegateCommand(DeleteBook, DeleteBookCanExecute));
+      _deleteBookCommand ??= new DelegateCommand(DeleteBook, DeleteBookCanExecute);
 
     private DelegateCommand _openBookCommand;
 
@@ -96,7 +96,7 @@ namespace Library.Client.ViewModel
     /// Команда открытия книги.
     /// </summary>
     public DelegateCommand OpenBookCommand =>
-      _openBookCommand ?? (_openBookCommand = new DelegateCommand(OpenBook, OpenBookCanExecute));
+      _openBookCommand ??= new DelegateCommand(OpenBook, OpenBookCanExecute);
 
     #endregion
 
@@ -122,13 +122,13 @@ namespace Library.Client.ViewModel
         return;
       var searchResponse = ElasticProvider.Instance.Search(SearchPhrase);
       var booksWithPages = new Dictionary<Guid, List<float>>();
-      foreach (var field in searchResponse.Fields)
+      foreach (var hit in searchResponse.Hits)
       {
-        var bookId = field.Value<Guid>(new Field("bookId"));
-        var page = field.Value<float>(new Field("number"));
+        var bookId = hit.Fields.Value<Guid>(new Field("bookId"));
+        var pageNumber = hit.Fields.Value<float>(new Field("number"));
         if (!booksWithPages.ContainsKey(bookId))
           booksWithPages.Add(bookId, new List<float>());
-        booksWithPages[bookId].Add(page);
+        booksWithPages[bookId].Add(pageNumber);
       }
       UpdateMessageTextBox($"Найдено экземпляров: {booksWithPages.Count}");
 
