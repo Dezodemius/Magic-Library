@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Library.Entity;
 using Library.Resources;
@@ -78,6 +79,17 @@ namespace Library.Utils
     }
 
     /// <summary>
+    /// Проверить соединение с сервисом ES.
+    /// </summary>
+    /// <returns></returns>
+    public bool CheckElasticsearchConnection()
+    {
+      var pingResponse = Client.Ping();
+      _log.Debug(pingResponse.ApiCall.Success);
+      return pingResponse.ApiCall.Success;
+    }
+    
+    /// <summary>
     /// Создать и настроить индекс /books.
     /// </summary>
     private void CreateBooksIndex()
@@ -104,16 +116,28 @@ namespace Library.Utils
     {
       if (!Client.Indices.Exists(Indices.Parse(PagesIndexName)).Exists)
       {
+        var stopwords = this.GetStopwords();
         Client.Indices.Create(Indices.Index(PagesIndexName),
           i => i
             .Map<Page>(m => m
               .Properties(ps => ps
                 .Number(n => n.Name(na => na.Number).Store())
                 .Keyword(k => k.Name(n => n.BookId).Store())
+                .Text(t => t
+                  .Name(n => n.Attachment.Content)
+                  .Analyzer("my_russian_morphology"))
                 .Object<Attachment>(o => o
                   .Name(n => n.Attachment)
                   .AutoMap()))
-            ));
+              )
+            .Settings(s => s
+              .Analysis(a => a
+                .TokenFilters(f => f
+                  .Stop("morphology_stopwords", w => w.StopWords(stopwords)))
+                .Analyzers(aa => aa
+                  .Custom("my_russian_morphology", c => c
+                    .Tokenizer("standard")
+                    .Filters("lowercase", "russian_morphology", "english_morphology", "morphology_stopwords"))))));
 
         _log.Info($"Index {PagesIndexName} created.");
       }
@@ -122,18 +146,17 @@ namespace Library.Utils
         _log.Info($"Index '{PagesIndexName}' already exists.");
       }
     }
-    
+
     /// <summary>
-    /// Проверить соединение с сервисом ES.
+    /// Получить все стоп-слова для анализаторов.
     /// </summary>
-    /// <returns></returns>
-    public bool CheckElasticsearchConnection()
+    /// <returns>Стоп-слова.</returns>
+    private StopWords GetStopwords()
     {
-      var pingResponse = Client.Ping();
-      _log.Debug(pingResponse.ApiCall.Success);
-      return pingResponse.ApiCall.Success;
+      using var reader = new StreamReader("stopwords.txt");
+      return new StopWords(reader.ReadToEnd());
     }
-    
+
     #region Вспомогательные
     
     /// <summary>
@@ -279,9 +302,9 @@ namespace Library.Utils
     #region Поиск
 
     /// <summary>
-    /// Выполнить поиск по книгам.
+    /// Выполнить поиск по страницам.
     /// </summary>
-    /// <remarks>Поиск идёт относительно наименований книг.</remarks>
+    /// <remarks>Поиск по содержанию страниц.</remarks>
     /// <param name="searchPhrase">Поисковая фраза.</param>
     /// <returns>Результат поиска.</returns>
     public ISearchResponse<Page> Search(string searchPhrase)
@@ -295,7 +318,12 @@ namespace Library.Utils
           .Query(q => q
             .Match(c => c
               .Field(f =>  f.Attachment.Content)
-              .Query(searchPhrase)))
+              .Query(searchPhrase)
+              .Analyzer("my_russian_morphology")))
+          .Sort(s => s
+            .Ascending(f => f
+              .Number))
+          .Size(1000)
           .Highlight(h => h
             .Fields(f => f.Field(b => b.Attachment.Content))));
       }
@@ -353,16 +381,10 @@ namespace Library.Utils
           .DeleteMany(books));
 
       if (bulkRequest.Errors)
-      {
         foreach (var itemWithError in bulkRequest.ItemsWithErrors)
-        {
-          _log.Debug("Failed to delete document {0}: {1}", itemWithError.Id, itemWithError.Error);
-        }
-      }
+          _log.Debug($"Failed to delete document {itemWithError.Id}: {itemWithError.Error}");
       else
-      {
         _log.Debug("Bulk delete. All books deleted.");
-      }
     }
     
     /// <summary>

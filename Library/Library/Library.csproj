@@ -28,7 +28,9 @@
         <DependentUpon>LibraryResources.resx</DependentUpon>
       </Compile>
     </ItemGroup>
-
+    <ItemGroup>
+        <None Update="stopwords.txt" CopyToOutputDirectory="PreserveNewest"/>
+    </ItemGroup>
     <ItemGroup>
       <Reference Include="System.Net.Http" />
     </ItemGroup>
