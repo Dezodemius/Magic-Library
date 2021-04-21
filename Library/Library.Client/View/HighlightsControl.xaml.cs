@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Windows.Controls;
+using System.Windows.Data;
+
+namespace Library.Client.View
+{
+  public partial class HighlightsControl : UserControl
+  {
+    public HighlightsControl()
+    {
+      InitializeComponent();
+    }
+  }
+  public class HighlightConverter : IValueConverter
+  {
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+      if (value is IReadOnlyDictionary<string, IReadOnlyCollection<string>>  highlightWithPages)
+        return highlightWithPages["attachment.content"].ToList().First();
+      return string.Empty;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+      throw new NotImplementedException();
+    }
+  }
+}

@@ -13,5 +13,8 @@
         <DataTemplate DataType="{x:Type viewModel:MainWindowViewModel}">
             <view:MainControl/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModel:HighlightsViewModel}">
+            <view:HighlightsControl/>
+        </DataTemplate>
     </Application.Resources>
 </Application>

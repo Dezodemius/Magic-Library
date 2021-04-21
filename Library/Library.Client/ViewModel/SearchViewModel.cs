@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using Library.Client.Model;
 using Library.Client.Utils;
 using Library.Entity;
@@ -98,6 +99,13 @@ namespace Library.Client.ViewModel
     public DelegateCommand OpenBookCommand =>
       _openBookCommand ??= new DelegateCommand(OpenBook, OpenBookCanExecute);
 
+    private DelegateCommand _openBookHighlightsCommand;
+    /// <summary>
+    /// Команда открытия Highlights.
+    /// </summary>
+    public DelegateCommand OpenBookHighlightsCommand =>
+      _openBookHighlightsCommand ??= new DelegateCommand(OpenBookHighlights, OpenBookHighlightsCanExecute);
+
     #endregion
 
     #region Методы
@@ -118,29 +126,28 @@ namespace Library.Client.ViewModel
     /// <param name="obj">Объект.</param>
     private void Search(object obj)
     {
+      FoundedBooks.Clear();
       if (string.IsNullOrEmpty(SearchPhrase))
         return;
       var searchResponse = ElasticProvider.Instance.Search(SearchPhrase);
-      var booksWithPages = new Dictionary<Guid, List<float>>();
+      
+      var currentBook = new BookWithPages();
       foreach (var hit in searchResponse.Hits)
       {
         var bookId = hit.Fields.Value<Guid>(new Field("bookId"));
         var pageNumber = hit.Fields.Value<float>(new Field("number"));
-        if (!booksWithPages.ContainsKey(bookId))
-          booksWithPages.Add(bookId, new List<float>());
-        booksWithPages[bookId].Add(pageNumber);
+        if (FoundedBooks.All(b => b.Id != bookId))
+        {
+          var book = BookManager.Instance.GetBook(bookId);
+          if (book == null)
+            continue;
+          currentBook = new BookWithPages(book, new List<float>());
+          FoundedBooks.Add(currentBook);
+        }
+        currentBook.Pages.Add(pageNumber);
+        currentBook.Highlights.Add(new HighlightWithPages {Highlight = hit.Highlight, Page = pageNumber});
       }
-      UpdateMessageTextBox($"Найдено экземпляров: {booksWithPages.Count}");
-
-      FoundedBooks.Clear();
-      foreach (var bookId in booksWithPages.Keys)
-      {
-        var book = BookManager.Instance.GetBook(bookId);
-        if (book == null)
-          Log.Error($"Book with ID {bookId} does not exist localy.");
-        var pages = string.Join(", ", booksWithPages[bookId]);
-        FoundedBooks.Add(new BookWithPages(book, pages));
-      }
+      UpdateMessageTextBox($"Найдено экземпляров: {FoundedBooks.Count}");
     }
 
     /// <summary>
@@ -226,7 +233,7 @@ namespace Library.Client.ViewModel
 
       FoundedBooks.Clear();
       foreach (var book in foundedBooks)
-        FoundedBooks.Add(new BookWithPages(book, string.Empty));
+        FoundedBooks.Add(new BookWithPages(book, new List<float>()));
     }
 
     /// <summary>
@@ -282,9 +289,38 @@ namespace Library.Client.ViewModel
     {
       if (obj is Book book)
       {
-        System.Diagnostics.Process.Start(Path.Combine(BookManager.Instance.BookShelfPath.FullName,
-          book.Name + ".pdf"));
+        var filepath = Path.Combine(BookManager.Instance.BookShelfPath.FullName, book.Name + ".pdf");
+        System.Diagnostics.Process.Start(filepath);
         UpdateMessageTextBox($"Открыта {book.Name}");
+      }
+    }
+    
+    /// <summary>
+    /// Возможность открыть Highlights книги.
+    /// </summary>
+    /// <param name="arg"></param>
+    /// <returns>True, если возможно.</returns>
+    private static bool OpenBookHighlightsCanExecute(object arg)
+    {
+      if (arg is BookWithPages book)
+        return BookManager.Instance.IsBookExisted(book) && book.Pages.Any() && book.Highlights.Any();
+      return false;
+    }
+
+    /// <summary>
+    /// Открытие Hihglights книги.
+    /// </summary>
+    /// <param name="obj">Объект книги.</param>
+    private void OpenBookHighlights(object obj)
+    {
+      if (obj is BookWithPages book)
+      {
+        var highlightsViewModel = new HighlightsViewModel
+        {
+            SelectedBook = book.Highlights
+        };
+        ViewService.OpenViewModel(highlightsViewModel, book, 1024, 768);
+        UpdateMessageTextBox($"Открыта страница с Highlights книги {book.Name}");
       }
     }
 

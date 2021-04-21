@@ -29,16 +29,7 @@ namespace Library.Client.Utils
     /// <param name="height">Высота окна.</param>
     public static void OpenViewModel(ViewModel.ViewModel viewModel, double width, double height)
     {
-      Window openedWindow = OpenedWindows.SingleOrDefault(window => window.Content.Equals(viewModel));
-      if (openedWindow == null)
-      {
-        openedWindow = new Window {Width = width, Height = height, Title = viewModel.Name, Content = viewModel};
-        openedWindow.Closed += OpenedWindowClosed;
-        OpenedWindows.Add(openedWindow);
-        openedWindow.Show();
-      }
-      else
-        openedWindow.Activate();
+      OpenViewModel(viewModel, null, width, height);
     }
 
     /// <summary>
@@ -50,6 +41,22 @@ namespace Library.Client.Utils
       OpenViewModel(viewModel, 640, 480);
     }
 
+    public static void OpenViewModel(ViewModel.ViewModel viewModel, 
+      object dataContext, double width=640, double height=480)
+    {
+      Window openedWindow = OpenedWindows.SingleOrDefault(window => window.Content.Equals(viewModel));
+      if (openedWindow == null)
+      {
+        openedWindow = new Window {Width = width, Height = height, Title = viewModel.Name, Content = viewModel};
+        openedWindow.Closed += OpenedWindowClosed;
+        OpenedWindows.Add(openedWindow);
+        openedWindow.Show();
+        openedWindow.DataContext = dataContext;
+      }
+      else
+        openedWindow.Activate();
+    }
+    
     /// <summary>
     /// Обработчик события на закрытие окна.
     /// </summary>

@@ -8,6 +8,7 @@
              mc:Ignorable="d"  d:DataContext="{d:DesignInstance viewModel:SearchViewModel}">
     <UserControl.Resources>
         <view:IndexConverter x:Key="IndexConverter" />
+        <view:PagesConverter x:Key="PagesConverter" />
     </UserControl.Resources>
     <StackPanel Orientation="Vertical">
         <TextBox Text="{Binding SearchPhrase, Mode=OneWayToSource}" Margin="5"/>
@@ -25,7 +26,8 @@
                                         Converter={StaticResource IndexConverter}}"
                                         Width="30">№</GridViewColumn>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Width="200">Название</GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Pages}" Width="100">Страницы</GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Pages, Converter={StaticResource PagesConverter}}" 
+                        Width="100">Страницы</GridViewColumn>
                     </GridView>
                 </ListView.View>
                 <ListView.ContextMenu>
@@ -38,6 +40,10 @@
                                   CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, 
                               Path=PlacementTarget.SelectedItem}" 
                                   Command="{Binding DeleteBookCommand}"/>
+                        <MenuItem Header="Открыть Highlights"
+                                  CommandParameter="{Binding RelativeSource={RelativeSource 
+                                  AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"
+                                  Command="{Binding OpenBookHighlightsCommand}"></MenuItem>
                     </ContextMenu>
                 </ListView.ContextMenu>
             </ListView>

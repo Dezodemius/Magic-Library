@@ -125,7 +125,11 @@ namespace Library.Utils
                 .Keyword(k => k.Name(n => n.BookId).Store())
                 .Text(t => t
                   .Name(n => n.Attachment.Content)
-                  .Analyzer("my_russian_morphology"))
+                  .Analyzer("my_russian_morphology")
+                  .Fields(f => f
+                      .Text(d => d
+                          .Name(new PropertyName("exact"))
+                          .Analyzer("standard"))))
                 .Object<Attachment>(o => o
                   .Name(n => n.Attachment)
                   .AutoMap()))
@@ -314,18 +318,17 @@ namespace Library.Utils
       {
         _log.Debug($"Searching: {searchPhrase} in index: {PagesIndexName}");
         response = Client.Search<Page>(s => s.Index(Indices.Parse(PagesIndexName))
-          .StoredFields(sf => sf.Field(f => f.BookId).Field(f => f.Number))
-          .Query(q => q
-            .Match(c => c
-              .Field(f =>  f.Attachment.Content)
-              .Query(searchPhrase)
-              .Analyzer("my_russian_morphology")))
-          .Sort(s => s
+            .StoredFields(sf => sf.Field(f => f.BookId).Field(f => f.Number).Field(f => f.Attachment.Content))
+            .Query(q => q.SimpleQueryString(
+              sq => sq
+                  .Query(searchPhrase)
+                  .Fields(f => f.Field(p => p.Attachment.Content))))
+            .Sort(s => s
             .Ascending(f => f
               .Number))
-          .Size(1000)
-          .Highlight(h => h
-            .Fields(f => f.Field(b => b.Attachment.Content))));
+            .Size(1000)
+            .Highlight(h => h
+              .Fields(f => f.Field(b => b.Attachment.Content))));
       }
       catch (Exception e)
       {
