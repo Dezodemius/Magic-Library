@@ -17,7 +17,7 @@
                 <GridView>
                     <GridViewColumn DisplayMemberBinding="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}},
                                     Converter={StaticResource IndexConverter}}"
-                                    Width="30">№
+                                    Width="40">№
                     </GridViewColumn>
                     <GridViewColumn DisplayMemberBinding="{Binding Path=Highlight, Converter={StaticResource HighlightConverter}}"
                                     Width="600">Найденный текст
@@ -32,7 +32,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn DisplayMemberBinding="{Binding Path=Page}" 
-                                    Width="30">Номер страницы
+                                    Width="40">Номер страницы
                     </GridViewColumn>
                 </GridView>
             </ListView.View>

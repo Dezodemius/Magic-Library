@@ -10,16 +10,34 @@
         <view:IndexConverter x:Key="IndexConverter" />
         <view:PagesConverter x:Key="PagesConverter" />
     </UserControl.Resources>
-    <StackPanel Orientation="Vertical">
-        <TextBox Text="{Binding SearchPhrase, Mode=OneWayToSource}" Margin="5"/>
-        <StackPanel Orientation="Horizontal" Margin="5" Width="Auto">
-            <Button Margin="0 0 5 0" Command="{Binding SearchCommand}">Поиск</Button>
-            <Button Margin="5 0 5 0" Command="{Binding AddBookCommand}">Добавить</Button>
-            <Button Margin="5 0 5 0" Command="{Binding GetAllBooksCommand}">Получить все книги</Button>
-        </StackPanel>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" CanContentScroll="True">
-            <ListView MinHeight="300" Margin="5 0 5 0" HorizontalContentAlignment="Left" 
-                      ItemsSource="{Binding Path=FoundedBooks}">
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="141*"/>
+            <RowDefinition Height="34*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="1"
+              HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="Auto"  Margin="1" Height="50">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="Поиск" Margin="10" HorizontalAlignment="Left" Height="30"  Width="100" VerticalAlignment="Center" Command="{Binding SearchCommand}"/>
+            <Button Content="Добавить" Margin="10" HorizontalAlignment="Right" Height="30" Width="100" Grid.Column="2" Command="{Binding AddBookCommand}"/>
+            <Button Content="Получить все"  Margin="10" HorizontalAlignment="Center" Height="30"  Width="100" VerticalAlignment="Center" Grid.Column="1" Command="{Binding GetAllBooksCommand}"/>
+        </Grid>
+        <TextBox Margin="10,10,9.6,10" 
+                 TextWrapping="Wrap" 
+                 Grid.Row="0" Grid.Column="0"
+                 HorizontalAlignment="Stretch" 
+                 Height="20" 
+                 Width="Auto" 
+                 VerticalAlignment="Center"
+                 Text="{Binding SearchPhrase, Mode=OneWayToSource}" />
+        <ScrollViewer Margin="1" Grid.Row="2" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" CanContentScroll="True">
+            <ListView Height="Auto" Width="Auto" ItemsSource="{Binding Path=FoundedBooks}">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn DisplayMemberBinding="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}, 
@@ -27,7 +45,7 @@
                                         Width="30">№</GridViewColumn>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Width="200">Название</GridViewColumn>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=Pages, Converter={StaticResource PagesConverter}}" 
-                        Width="100">Страницы</GridViewColumn>
+                                        Width="100">Страницы</GridViewColumn>
                     </GridView>
                 </ListView.View>
                 <ListView.ContextMenu>
@@ -48,11 +66,8 @@
                 </ListView.ContextMenu>
             </ListView>
         </ScrollViewer>
-        <ScrollViewer CanContentScroll="True" Height="70" VerticalScrollBarVisibility="Auto">
-            <TextBox MinHeight="55" 
-                     Margin="5 10 5 0" 
-                     Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" 
-                     IsReadOnly="True"/>
+        <ScrollViewer HorizontalAlignment="Stretch" Height="70" Margin="1" Grid.Row="3" VerticalAlignment="Bottom" MinHeight="55">
+            <TextBlock Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Stretch" Margin="10" Grid.Row="3" TextWrapping="Wrap" VerticalAlignment="Bottom" Height="50"/>
         </ScrollViewer>
-    </StackPanel>
+    </Grid>
 </UserControl>

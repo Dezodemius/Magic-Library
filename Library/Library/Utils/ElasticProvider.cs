@@ -125,13 +125,17 @@ namespace Library.Utils
                 .Keyword(k => k.Name(n => n.BookId).Store())
                 .Text(t => t
                   .Name(n => n.Attachment.Content)
-                  .Analyzer("my_russian_morphology")
-                  .Fields(f => f
-                      .Text(d => d
-                          .Name(new PropertyName("exact"))
-                          .Analyzer("standard"))))
+                  .Analyzer("my_russian_morphology"))
                 .Object<Attachment>(o => o
                   .Name(n => n.Attachment)
+                  .Properties(p => p
+                      .Text(t => t
+                          .Name(n => n.Content)
+                          .Analyzer("my_russian_morphology")
+                          .Fields(f => f
+                              .Text(t => t
+                                  .Analyzer("standard")
+                                  .Name("exact")))))
                   .AutoMap()))
               )
             .Settings(s => s
@@ -324,11 +328,11 @@ namespace Library.Utils
                   .Query(searchPhrase)
                   .Fields(f => f.Field(p => p.Attachment.Content))))
             .Sort(s => s
-            .Ascending(f => f
-              .Number))
+                .Ascending(f => f
+                    .Number))
             .Size(1000)
             .Highlight(h => h
-              .Fields(f => f.Field(b => b.Attachment.Content))));
+                .Fields(f => f.Field(b => b.Attachment.Content))));
       }
       catch (Exception e)
       {
