@@ -14,6 +14,7 @@
         <WarningLevel>4</WarningLevel>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
         <LangVersion>8</LangVersion>
+        <ApplicationIcon>Library.ico</ApplicationIcon>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -82,12 +83,8 @@
         <Compile Include="View\HighlightsControl.xaml.cs">
           <DependentUpon>HighlightsControl.xaml</DependentUpon>
         </Compile>
-        <Compile Include="View\MainControl.xaml.cs">
-          <DependentUpon>MainControl.xaml</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-        <Compile Include="View\SearchControl.xaml.cs">
-          <DependentUpon>SearchControl.xaml</DependentUpon>
+        <Compile Include="View\MainWindow.xaml.cs">
+          <DependentUpon>MainWindow.xaml</DependentUpon>
         </Compile>
     </ItemGroup>
     <ItemGroup>
@@ -104,11 +101,7 @@
     </ItemGroup>
     <ItemGroup>
       <Page Include="View\HighlightsControl.xaml" />
-      <Page Include="View\MainControl.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <SubType>Designer</SubType>
-      </Page>
-      <Page Include="View\SearchControl.xaml" />
+      <Page Include="View\MainWindow.xaml" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\Library\Library.csproj">
@@ -131,7 +124,12 @@
       <SplashScreen Include="splashscreen.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </SplashScreen>
+    <Content Include="Library.ico">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
     </ItemGroup>
+
     <ItemGroup>
       <PackageReference Include="NLog" Version="4.7.2" />
     </ItemGroup>

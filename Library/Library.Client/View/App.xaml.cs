@@ -37,14 +37,16 @@ namespace Library.Client.View
     private void App_OnStartup(object sender, StartupEventArgs e)
     {
       ShowTransparentWindow();
+      var splash = new SplashScreen("splashscreen.png");
+      splash.Show(false);
       InitApplication();
 
       ElasticProvider.Instance.Initialize();
       ElasticSynchronizer.SynchronizeWithDisk();
 
-      ViewService.OpenViewModel(new MainWindowViewModel());
       transparentWindow.Close();
       transparentWindow = null;
+      splash.Close(TimeSpan.Zero);
     }
 
     private void App_OnExit(object sender, ExitEventArgs e)

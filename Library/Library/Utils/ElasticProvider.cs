@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Elasticsearch.Net;
 using Library.Entity;
 using Library.Resources;
 using Nest;
@@ -322,13 +323,19 @@ namespace Library.Utils
       {
         _log.Debug($"Searching: {searchPhrase} in index: {PagesIndexName}");
         response = Client.Search<Page>(s => s.Index(Indices.Parse(PagesIndexName))
-            .StoredFields(sf => sf.Field(f => f.BookId).Field(f => f.Number).Field(f => f.Attachment.Content))
-            .Query(q => q.SimpleQueryString(sq => sq
+            .StoredFields(sf => sf.Field(f => f.BookId).Field(f => f.Number).Field(f => f.Attachment.Content).Field("_score"))
+            .Query(q => q
+                .SimpleQueryString(sq => sq
                   .Query(searchPhrase)
+                  .DefaultOperator(Operator.And)
                   .Fields(f => f.Field(p => p.Attachment.Content))
-                  .Analyzer("my_russian_morphology")))
+                  .Analyzer("my_russian_morphology")
+                  .Flags(SimpleQueryStringFlags.Near | 
+                         SimpleQueryStringFlags.Phrase |
+                         SimpleQueryStringFlags.Fuzzy)))
             .Sort(s => s
-                .Ascending(f => f.BookId))
+                .Ascending(f => f.BookId)
+                .Field(f => f.Field("_score")))
             .Size(10000)
             .Highlight(h => h
                 .Fields(f => f.Field(b => b.Attachment.Content))));

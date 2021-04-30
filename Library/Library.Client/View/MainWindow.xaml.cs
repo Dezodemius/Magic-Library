@@ -1,22 +1,21 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using Library.Client.ViewModel;
 
 namespace Library.Client.View
 {
-  /// <summary>
-  /// Логика взаимодействия для SearchControl.xaml.
-  /// </summary>
-  public partial class SearchControl : UserControl
+  public partial class MainWindow : Window
   {
-    public SearchControl()
+    public MainWindow()
     {
       InitializeComponent();
+      DataContext = new SearchViewModel();
     }
   }
-    
   /// <summary>
   /// Конвертер индексов.
   /// </summary>

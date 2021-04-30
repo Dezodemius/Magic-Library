@@ -7,12 +7,12 @@
              Startup="App_OnStartup"
              Exit="App_OnExit"
              ShutdownMode="OnLastWindowClose">
+    <Application.MainWindow>
+        <view:MainWindow Visibility="Visible"/>
+    </Application.MainWindow>
     <Application.Resources>
         <DataTemplate DataType="{x:Type viewModel:SearchViewModel}">
-            <view:SearchControl/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type viewModel:MainWindowViewModel}">
-            <view:MainControl/>
+            <view:MainWindow/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type viewModel:HighlightsViewModel}">
             <view:HighlightsControl/>

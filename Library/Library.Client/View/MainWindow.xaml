@@ -1,15 +1,18 @@
-﻿<UserControl x:Class="Library.Client.View.SearchControl"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:view="clr-namespace:Library.Client.View"
-             xmlns:viewModel="clr-namespace:Library.Client.ViewModel"
-             mc:Ignorable="d"  d:DataContext="{d:DesignInstance viewModel:SearchViewModel}">
-    <UserControl.Resources>
-        <view:IndexConverter x:Key="IndexConverter" />
-        <view:PagesConverter x:Key="PagesConverter" />
-    </UserControl.Resources>
+﻿<Window x:Class="Library.Client.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:Library.Client.View"
+        mc:Ignorable="d"
+        Title="Library"
+        Width="640" Height="480"
+        MinWidth="440" MinHeight="280"
+        WindowStartupLocation="CenterScreen">
+     <Window.Resources>
+        <local:IndexConverter x:Key="IndexConverter" />
+        <local:PagesConverter x:Key="PagesConverter" />
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
@@ -149,4 +152,4 @@
                        Height="50"/>
         </ScrollViewer>
     </Grid>
-</UserControl>
+</Window>
