@@ -173,7 +173,7 @@ namespace Library
     /// <returns>True, если в папке с книгами есть книга с таким же именем</returns>
     public bool IsBookExisted(Book book)
     {
-      foreach (var file in BookShelfPath.GetFiles())
+      foreach (var file in BookShelfPath.GetFiles("*.json"))
       {
         if (Path.GetFileNameWithoutExtension(file.FullName) == book.Name)
         {
@@ -184,6 +184,16 @@ namespace Library
       }
 
       return false;
+    }
+
+    /// <summary>
+    /// Проверить, что книга существует в папке.
+    /// </summary>
+    /// <param name="bookName">Имя книги.</param>
+    /// <returns>Признак того, что книга существует в папке.</returns>
+    public bool IsSameNameBookExisted(string bookName)
+    {
+      return BookShelfPath.GetFiles("*.pdf").Any(f => Path.GetFileNameWithoutExtension(f.FullName) == bookName);
     }
     
     /// <summary>

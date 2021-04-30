@@ -29,11 +29,21 @@ namespace Library.Client.ViewModel
     /// Имя окна.
     /// </summary>
     public override string Name { get; } = "Поиск";
-
+    
     /// <summary>
     /// Коллекция найденных книг.
     /// </summary>
-    public ObservableCollection<BookWithPages> FoundedBooks { get; set; } = new ObservableCollection<BookWithPages>();
+    public ObservableCollection<BookWithPages> FoundedBooks { get; set; } = GetBooks();
+
+    private static ObservableCollection<BookWithPages> GetBooks()
+    {
+      var allBooks = BookManager.Instance.GetAllBooks();
+      var books = new ObservableCollection<BookWithPages>();
+      foreach (var book in allBooks)
+        books.Add(new BookWithPages(book, new List<float>()));
+      
+      return books;
+    }
 
     private string _message;
 
