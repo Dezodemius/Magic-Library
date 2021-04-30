@@ -5,13 +5,17 @@
              xmlns:view="clr-namespace:Library.Client.View"
              DispatcherUnhandledException="App_OnDispatcherUnhandledException"
              Startup="App_OnStartup"
-             Exit="App_OnExit">
+             Exit="App_OnExit"
+             ShutdownMode="OnLastWindowClose">
     <Application.Resources>
         <DataTemplate DataType="{x:Type viewModel:SearchViewModel}">
             <view:SearchControl/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type viewModel:MainWindowViewModel}">
             <view:MainControl/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModel:HighlightsViewModel}">
+            <view:HighlightsControl/>
         </DataTemplate>
     </Application.Resources>
 </Application>

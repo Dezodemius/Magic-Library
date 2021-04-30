@@ -87,7 +87,7 @@ namespace Library.Client.Utils
       {
         Log.Info("Старт сервиса Elasticsearch.");
         _elasticsearchService.Start();
-        _elasticsearchService.WaitForStatus(ServiceControllerStatus.Running);
+        _elasticsearchService.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromMinutes(1));
       }
       else
       {

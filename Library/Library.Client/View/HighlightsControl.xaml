@@ -1,0 +1,77 @@
+﻿<UserControl x:Class="Library.Client.View.HighlightsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:view="clr-namespace:Library.Client.View"
+             xmlns:viewModel="clr-namespace:Library.Client.ViewModel"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300" d:DataContext="{d:DesignInstance viewModel:HighlightsViewModel}">
+    <UserControl.Resources>
+        <view:IndexConverter x:Key="IndexConverter" />
+        <view:HighlightConverter x:Key="HighlightConverter" />
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                  CanContentScroll="True">
+        <ListView ItemsSource="{Binding Path=Highlights}">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn >
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="#" 
+                                           HorizontalAlignment="Left" 
+                                           VerticalAlignment="Top" 
+                                           MinWidth="10" 
+                                           Width="20"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}},
+                                    Converter={StaticResource IndexConverter}}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn>
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="Highlight" HorizontalAlignment="Stretch"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=Highlight, Converter={StaticResource HighlightConverter}}"
+                                           TextAlignment="Justify"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn>
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="Страница" 
+                                           HorizontalAlignment="Right" 
+                                           MinWidth="10" 
+                                           Width="20"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=Page}"
+                                           TextAlignment="Justify"
+                                           FontWeight="Bold"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Открыть в IE"
+                              CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}" 
+                              Command="{Binding OpenPageCommand}"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
+        </ListView>
+    </ScrollViewer>
+</UserControl>

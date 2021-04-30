@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Library.Entity;
 using Library.Resources;
@@ -54,7 +55,7 @@ namespace Library.Utils
     /// <summary>
     /// Экземпляр клиента Elasticsearch.
     /// </summary>
-    private ElasticClient Client { get; set; }
+    private ElasticClient Client { get; }
 
     /// <summary>
     /// Логгер класса.
@@ -65,6 +66,9 @@ namespace Library.Utils
     
     #region Методы
 
+    /// <summary>
+    /// Инициализация клиента для работы с ES.
+    /// </summary>
     public void Initialize()
     {
       CreateBooksIndex();
@@ -74,6 +78,10 @@ namespace Library.Utils
       PutPipeline();
     }
 
+    /// <summary>
+    /// Проверить соединение с сервисом ES.
+    /// </summary>
+    /// <returns></returns>
     public bool CheckElasticsearchConnection()
     {
       var pingResponse = Client.Ping();
@@ -81,6 +89,82 @@ namespace Library.Utils
       return pingResponse.ApiCall.Success;
     }
     
+    /// <summary>
+    /// Создать и настроить индекс /books.
+    /// </summary>
+    private void CreateBooksIndex()
+    {
+      if (!Client.Indices.Exists(Indices.Index(BooksIndexName)).Exists)
+      {
+        Client.Indices.Create(Indices.Index(BooksIndexName),
+          i => i
+            .Map<Book>(m => m
+              .AutoMap()));
+
+        _log.Info($"Index {BooksIndexName} created.");
+      }
+      else
+      {
+        _log.Info($"Index '{BooksIndexName}' already exists.");
+      }
+    }
+    
+    /// <summary>
+    /// Создать и настроить индекс /pages.
+    /// </summary>
+    private void CreatePagesIndex()
+    {
+      if (!Client.Indices.Exists(Indices.Parse(PagesIndexName)).Exists)
+      {
+        var stopwords = this.GetStopwords();
+        Client.Indices.Create(Indices.Index(PagesIndexName),
+          i => i
+            .Map<Page>(m => m
+              .Properties(ps => ps
+                .Number(n => n.Name(na => na.Number).Store())
+                .Keyword(k => k.Name(n => n.BookId).Store())
+                .Text(t => t
+                  .Name(n => n.Attachment.Content)
+                  .Analyzer("my_russian_morphology"))
+                .Object<Attachment>(o => o
+                  .Name(n => n.Attachment)
+                  .Properties(p => p
+                      .Text(t => t
+                          .Name(n => n.Content)
+                          .Analyzer("my_russian_morphology")
+                          .Fields(f => f
+                              .Text(t => t
+                                  .Analyzer("standard")
+                                  .Name("exact")))))
+                  .AutoMap()))
+              )
+            .Settings(s => s
+              .Analysis(a => a
+                .TokenFilters(f => f
+                  .Stop("morphology_stopwords", w => w.StopWords(stopwords)))
+                .Analyzers(aa => aa
+                  .Custom("my_russian_morphology", c => c
+                    .Tokenizer("standard")
+                    .Filters("lowercase", "russian_morphology", "english_morphology", "morphology_stopwords"))))));
+
+        _log.Info($"Index {PagesIndexName} created.");
+      }
+      else
+      {
+        _log.Info($"Index '{PagesIndexName}' already exists.");
+      }
+    }
+
+    /// <summary>
+    /// Получить все стоп-слова для анализаторов.
+    /// </summary>
+    /// <returns>Стоп-слова.</returns>
+    private StopWords GetStopwords()
+    {
+      using var reader = new StreamReader("stopwords.txt");
+      return new StopWords(reader.ReadToEnd());
+    }
+
     #region Вспомогательные
     
     /// <summary>
@@ -226,9 +310,9 @@ namespace Library.Utils
     #region Поиск
 
     /// <summary>
-    /// Выполнить поиск по книгам.
+    /// Выполнить поиск по страницам.
     /// </summary>
-    /// <remarks>Поиск идёт относительно наименований книг.</remarks>
+    /// <remarks>Поиск по содержанию страниц.</remarks>
     /// <param name="searchPhrase">Поисковая фраза.</param>
     /// <returns>Результат поиска.</returns>
     public ISearchResponse<Page> Search(string searchPhrase)
@@ -238,13 +322,16 @@ namespace Library.Utils
       {
         _log.Debug($"Searching: {searchPhrase} in index: {PagesIndexName}");
         response = Client.Search<Page>(s => s.Index(Indices.Parse(PagesIndexName))
-          .StoredFields(sf => sf.Field(f => f.BookId).Field(f => f.Number))
-          .Query(q => q
-            .Match(c => c
-              .Field(f =>  f.Attachment.Content)
-              .Query(searchPhrase)))
-          .Highlight(h => h
-            .Fields(f => f.Field(b => b.Attachment.Content))));
+            .StoredFields(sf => sf.Field(f => f.BookId).Field(f => f.Number).Field(f => f.Attachment.Content))
+            .Query(q => q.SimpleQueryString(sq => sq
+                  .Query(searchPhrase)
+                  .Fields(f => f.Field(p => p.Attachment.Content))
+                  .Analyzer("my_russian_morphology")))
+            .Sort(s => s
+                .Ascending(f => f.BookId))
+            .Size(10000)
+            .Highlight(h => h
+                .Fields(f => f.Field(b => b.Attachment.Content))));
       }
       catch (Exception e)
       {
@@ -300,16 +387,10 @@ namespace Library.Utils
           .DeleteMany(books));
 
       if (bulkRequest.Errors)
-      {
         foreach (var itemWithError in bulkRequest.ItemsWithErrors)
-        {
-          _log.Debug("Failed to delete document {0}: {1}", itemWithError.Id, itemWithError.Error);
-        }
-      }
+          _log.Debug($"Failed to delete document {itemWithError.Id}: {itemWithError.Error}");
       else
-      {
         _log.Debug("Bulk delete. All books deleted.");
-      }
     }
     
     /// <summary>
@@ -357,52 +438,6 @@ namespace Library.Utils
     }
 
     #endregion
-
-    /// <summary>
-    /// Создать и настроить индекс /books.
-    /// </summary>
-    private void CreateBooksIndex()
-    {
-      if (!Client.Indices.Exists(Indices.Index(BooksIndexName)).Exists)
-      {
-        Client.Indices.Create(Indices.Index(BooksIndexName),
-          i => i
-            .Map<Book>(m => m
-              .AutoMap()));
-
-        _log.Info($"Index {BooksIndexName} created.");
-      }
-      else
-      {
-        _log.Info($"Index '{BooksIndexName}' already exists.");
-      }
-    }
-    
-    /// <summary>
-    /// Создать и настроить индекс /pages.
-    /// </summary>
-    private void CreatePagesIndex()
-    {
-      if (!Client.Indices.Exists(Indices.Parse(PagesIndexName)).Exists)
-      {
-        Client.Indices.Create(Indices.Index(PagesIndexName),
-          i => i
-            .Map<Page>(m => m
-              .Properties(ps => ps
-                .Number(n => n.Name(na => na.Number).Store())
-                .Keyword(k => k.Name(n => n.BookId).Store())
-                .Object<Attachment>(o => o
-                  .Name(n => n.Attachment)
-                  .AutoMap()))
-                ));
-
-        _log.Info($"Index {PagesIndexName} created.");
-      }
-      else
-      {
-        _log.Info($"Index '{PagesIndexName}' already exists.");
-      }
-    }
     
     #endregion
 

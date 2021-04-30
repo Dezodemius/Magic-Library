@@ -8,45 +8,145 @@
              mc:Ignorable="d"  d:DataContext="{d:DesignInstance viewModel:SearchViewModel}">
     <UserControl.Resources>
         <view:IndexConverter x:Key="IndexConverter" />
+        <view:PagesConverter x:Key="PagesConverter" />
     </UserControl.Resources>
-    <StackPanel Orientation="Vertical">
-        <TextBox Text="{Binding SearchPhrase, Mode=OneWayToSource}" Margin="5"/>
-        <StackPanel Orientation="Horizontal" Margin="5" Width="Auto">
-            <Button Margin="0 0 5 0" Command="{Binding SearchCommand}">Поиск</Button>
-            <Button Margin="5 0 5 0" Command="{Binding AddBookCommand}">Добавить</Button>
-            <Button Margin="5 0 5 0" Command="{Binding GetAllBooksCommand}">Получить все книги</Button>
-        </StackPanel>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" CanContentScroll="True">
-            <ListView MinHeight="300" Margin="5 0 5 0" HorizontalContentAlignment="Left" 
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="140*"/>
+            <RowDefinition Height="35*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="1"
+              HorizontalAlignment="Stretch" 
+              VerticalAlignment="Center" 
+              Width="Auto"  
+              Height="50"
+              Margin="1" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0"
+                    Content="Поиск" 
+                    Margin="10" 
+                    HorizontalAlignment="Left" 
+                    VerticalAlignment="Center" 
+                    Height="30"  
+                    Width="100"
+                    Command="{Binding SearchCommand}"/>
+            <Button Grid.Column="1" 
+                    Content="Добавить" 
+                    Margin="10" 
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Center" 
+                    Height="30" 
+                    Width="100" 
+                    Command="{Binding AddBookCommand}"/>
+            <Button Grid.Column="2"
+                    Content="Получить все" 
+                    Margin="10" 
+                    HorizontalAlignment="Right" 
+                    VerticalAlignment="Center" 
+                    Height="30" 
+                    Width="100" 
+                    Command="{Binding GetAllBooksCommand}"/>
+        </Grid>
+        <TextBox Grid.Row="0" 
+                 Grid.Column="0" 
+                 Margin="10" 
+                 TextWrapping="Wrap" 
+                 HorizontalAlignment="Stretch" 
+                 VerticalAlignment="Center"
+                 Height="20" 
+                 Width="Auto" 
+                 Text="{Binding SearchPhrase, Mode=OneWayToSource}" />
+        <ScrollViewer Grid.Row="2" 
+                      Margin="1" 
+                      HorizontalAlignment="Stretch" 
+                      VerticalAlignment="Stretch" 
+                      VerticalScrollBarVisibility="Auto" 
+                      CanContentScroll="True">
+            <ListView Height="Auto" 
+                      Width="Auto" 
                       ItemsSource="{Binding Path=FoundedBooks}">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn DisplayMemberBinding="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}, 
-                                        Converter={StaticResource IndexConverter}}"
-                                        Width="30">№</GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Width="200">Название</GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Pages}" Width="100">Страницы</GridViewColumn>
+                        <GridViewColumn>
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="#" 
+                                               HorizontalAlignment="Left"
+                                               MinWidth="10" 
+                                               Width="20"/>
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate >
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}, 
+                                        Converter={StaticResource IndexConverter}}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn>
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="Название" 
+                                               TextAlignment="Left" 
+                                               MinWidth="450"/>
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Name}"
+                                               HorizontalAlignment="Stretch"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn  >
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="Страницы" 
+                                               HorizontalAlignment="Right" 
+                                               MinWidth="100"/>
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Pages, Converter={StaticResource PagesConverter}}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
                     </GridView>
                 </ListView.View>
                 <ListView.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Открыть"
-                                  CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, 
-                              Path=PlacementTarget.SelectedItem}" 
+                                  CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}" 
                                   Command="{Binding OpenBookCommand}"/>
                         <MenuItem Header="Удалить" 
-                                  CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, 
-                              Path=PlacementTarget.SelectedItem}" 
+                                  CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}" 
                                   Command="{Binding DeleteBookCommand}"/>
+                        <MenuItem Header="Открыть Highlights"
+                                  CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"
+                                  Command="{Binding OpenBookHighlightsCommand}"/>
                     </ContextMenu>
                 </ListView.ContextMenu>
             </ListView>
         </ScrollViewer>
-        <ScrollViewer CanContentScroll="True" Height="70" VerticalScrollBarVisibility="Auto">
-            <TextBox MinHeight="55" 
-                     Margin="5 10 5 0" 
-                     Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" 
-                     IsReadOnly="True"/>
+        <ScrollViewer HorizontalAlignment="Stretch" 
+                      Height="70" 
+                      Margin="1" 
+                      Grid.Row="3" 
+                      VerticalAlignment="Bottom" 
+                      MinHeight="55">
+            <TextBlock Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"  
+                       HorizontalAlignment="Stretch" 
+                       Margin="10" Grid.Row="3" 
+                       TextWrapping="Wrap" 
+                       VerticalAlignment="Bottom" 
+                       Height="50"/>
         </ScrollViewer>
-    </StackPanel>
+    </Grid>
 </UserControl>

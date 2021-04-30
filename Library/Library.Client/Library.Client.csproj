@@ -66,16 +66,21 @@
         <Reference Include="PresentationFramework" />
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="Model\BookWithPages.cs" />
         <Compile Include="Settings\ApplicationSettings.cs" />
         <Compile Include="Utils\DelegateCommand.cs" />
         <Compile Include="Utils\ElasticsearchServiceManager.cs" />
         <Compile Include="Utils\ViewService.cs" />
+        <Compile Include="ViewModel\HighlightsViewModel.cs" />
         <Compile Include="ViewModel\MainWindowViewModel.cs" />
         <Compile Include="ViewModel\SearchViewModel.cs" />
         <Compile Include="ViewModel\ViewModel.cs" />
         <Compile Include="View\App.xaml.cs">
           <DependentUpon>App.xaml</DependentUpon>
           <SubType>Code</SubType>
+        </Compile>
+        <Compile Include="View\HighlightsControl.xaml.cs">
+          <DependentUpon>HighlightsControl.xaml</DependentUpon>
         </Compile>
         <Compile Include="View\MainControl.xaml.cs">
           <DependentUpon>MainControl.xaml</DependentUpon>
@@ -98,6 +103,7 @@
         <None Include="Properties\App.config" />
     </ItemGroup>
     <ItemGroup>
+      <Page Include="View\HighlightsControl.xaml" />
       <Page Include="View\MainControl.xaml">
         <Generator>MSBuild:Compile</Generator>
         <SubType>Designer</SubType>
@@ -117,10 +123,13 @@
       </ApplicationDefinition>
     </ItemGroup>
     <ItemGroup>
-      <Content Include="App_Config.example" />
+        <Content Include="Library.Client.exe.config.example">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+        </Content>
       <Content Include="Properties\App.manifest" />
       <SplashScreen Include="splashscreen.png">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </SplashScreen>
     </ItemGroup>
     <ItemGroup>

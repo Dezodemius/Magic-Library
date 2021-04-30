@@ -27,29 +27,27 @@ namespace Library.Client.Utils
     /// <param name="viewModel">Модель представления.</param>
     /// <param name="width">Ширина окна.</param>
     /// <param name="height">Высота окна.</param>
-    public static void OpenViewModel(ViewModel.ViewModel viewModel, double width, double height)
+    public static void OpenViewModel(ViewModel.ViewModel viewModel, double width = 640, double height = 480)
+    {
+      OpenViewModel(viewModel, null, width, height);
+    }
+
+    public static void OpenViewModel(ViewModel.ViewModel viewModel, 
+      object dataContext, double width=640, double height=480)
     {
       Window openedWindow = OpenedWindows.SingleOrDefault(window => window.Content.Equals(viewModel));
       if (openedWindow == null)
       {
-        openedWindow = new Window {Width = width, Height = height, Title = viewModel.Name, Content = viewModel};
+        openedWindow = new Window {Width = width, Height = height, Title = viewModel.Name, Content = viewModel, MinHeight = 450, MinWidth = 450};
         openedWindow.Closed += OpenedWindowClosed;
         OpenedWindows.Add(openedWindow);
         openedWindow.Show();
+        openedWindow.DataContext = dataContext;
       }
       else
         openedWindow.Activate();
     }
-
-    /// <summary>
-    /// Открыть представление.
-    /// </summary>
-    /// <param name="viewModel">Модель представления.</param>
-    public static void OpenViewModel(ViewModel.ViewModel viewModel)
-    {
-      OpenViewModel(viewModel, 640, 480);
-    }
-
+    
     /// <summary>
     /// Обработчик события на закрытие окна.
     /// </summary>
