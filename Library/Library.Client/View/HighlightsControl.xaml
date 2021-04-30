@@ -11,31 +11,67 @@
         <view:IndexConverter x:Key="IndexConverter" />
         <view:HighlightConverter x:Key="HighlightConverter" />
     </UserControl.Resources>
-    <ScrollViewer VerticalScrollBarVisibility="Auto" CanContentScroll="True">
-        <ListView ItemsSource="{Binding Path=SelectedBook}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                  CanContentScroll="True">
+        <ListView ItemsSource="{Binding Path=Highlights}">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn DisplayMemberBinding="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}},
-                                    Converter={StaticResource IndexConverter}}"
-                                    Width="40">№
-                    </GridViewColumn>
-                    <GridViewColumn DisplayMemberBinding="{Binding Path=Highlight, Converter={StaticResource HighlightConverter}}"
-                                    Width="600">Найденный текст
-                    
+                    <GridViewColumn >
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="#" 
+                                           HorizontalAlignment="Left" 
+                                           VerticalAlignment="Top" 
+                                           MinWidth="10" 
+                                           Width="20"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Title}" FontWeight="Bold" />
-                                    <TextBlock Text="{Binding Description}" />
-                                </StackPanel>
+                                <TextBlock Text="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}},
+                                    Converter={StaticResource IndexConverter}}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn DisplayMemberBinding="{Binding Path=Page}" 
-                                    Width="40">Номер страницы
+                    <GridViewColumn>
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="Highlight" HorizontalAlignment="Stretch"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=Highlight, Converter={StaticResource HighlightConverter}}"
+                                           TextAlignment="Justify"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn>
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="Страница" 
+                                           HorizontalAlignment="Right" 
+                                           MinWidth="10" 
+                                           Width="20"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=Page}"
+                                           TextAlignment="Justify"
+                                           FontWeight="Bold"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                 </GridView>
             </ListView.View>
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Открыть в IE"
+                              CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}" 
+                              Command="{Binding OpenPageCommand}"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
         </ListView>
     </ScrollViewer>
 </UserControl>

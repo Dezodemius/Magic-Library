@@ -110,6 +110,7 @@ namespace Library.Client.ViewModel
       _openBookCommand ??= new DelegateCommand(OpenBook, OpenBookCanExecute);
 
     private DelegateCommand _openBookHighlightsCommand;
+
     /// <summary>
     /// Команда открытия Highlights.
     /// </summary>
@@ -209,14 +210,21 @@ namespace Library.Client.ViewModel
       foreach (var pathToFile in openFileDialog.FileNames)
       {
         var bookId = Guid.NewGuid();
-        BookManager.Instance.AddBook(pathToFile, bookId);
         var book = new Book(bookId, Path.GetFileNameWithoutExtension(pathToFile));
+        if (BookManager.Instance.IsSameNameBookExisted(book.Name))
+        {
+          AppendToMessageTextBox($"Книга с именем {book.Name} уже сушествует.");
+          continue;
+        }
+        BookManager.Instance.AddBook(pathToFile, bookId);
 
         booksForIndexing.Add(book);
         AppendToMessageTextBox($"{book.Name} успешно добавлена");
     
         var pages = TextLayerExtractor.GetTextLayerWithPages(pathToFile, book.Id);
         ElasticProvider.Instance.BulkIndex(pages);
+        
+        this.FoundedBooks.Add(new BookWithPages(book, new List<float>()));
       }
 
       ElasticProvider.Instance.BulkIndex(booksForIndexing);
@@ -239,7 +247,7 @@ namespace Library.Client.ViewModel
     /// <param name="obj">Объект.</param>
     private void GetAllBooks(object obj)
     {
-      var foundedBooks = ElasticProvider.Instance.GetAllBooks();
+      var foundedBooks = BookManager.Instance.GetAllBooks();
 
       FoundedBooks.Clear();
       foreach (var book in foundedBooks)
@@ -276,6 +284,8 @@ namespace Library.Client.ViewModel
           messageText += $"{book.Name} - успешно удалена с индекса.\n";
 
         AppendToMessageTextBox(messageText);
+
+        this.FoundedBooks.Remove((BookWithPages)book);
       }
     }
 
@@ -327,9 +337,10 @@ namespace Library.Client.ViewModel
       {
         var highlightsViewModel = new HighlightsViewModel
         {
-            SelectedBook = book.Highlights
+            SelectedBook = book,
+            Highlights = book.Highlights
         };
-        ViewService.OpenViewModel(highlightsViewModel, book, 1024, 768);
+        ViewService.OpenViewModel(highlightsViewModel, book, 650, 650);
         UpdateMessageTextBox($"Открыта страница с Highlights книги {book.Name}");
       }
     }

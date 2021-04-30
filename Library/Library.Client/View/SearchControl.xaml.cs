@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Controls;
@@ -38,10 +38,10 @@ namespace Library.Client.View
       throw new NotImplementedException();
     }
   }
+  
   /// <summary>
-  /// Конвертер индексов.
+  /// Конвертер страниц.
   /// </summary>
-  /// <remarks>https://stackoverflow.com/questions/16060874/listview-row-numbers-without-binding/16061596.</remarks>
   public class PagesConverter : IValueConverter
   {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

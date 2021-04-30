@@ -7,6 +7,9 @@ namespace Library.Client.View
   /// </summary>
   public partial class MainControl : UserControl
   {
+    /// <summary>
+    /// Конструктор.
+    /// </summary>
     public MainControl()
     {
       InitializeComponent();
