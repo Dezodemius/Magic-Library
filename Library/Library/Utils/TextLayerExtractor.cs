@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using BitMiracle.Docotic.Pdf;
+using iTextSharp.text.pdf.parser;
 using Library.Entity;
 using NLog;
 using PdfDocument = BitMiracle.Docotic.Pdf.PdfDocument;
@@ -26,16 +28,15 @@ namespace Library.Utils
     public static IEnumerable<Page> GetTextLayerWithPages(string pdfPath, Guid bookId)
     {
       var pages = new List<Page>();
-      
-      using var pdfDocument = new PdfDocument(pdfPath);
-      for (var i = 0; i < pdfDocument.PageCount; i++)
+      var reader = new iTextSharp.text.pdf.PdfReader(pdfPath);
+      for (int i = 1; i <= reader.NumberOfPages; i++)
       {
-        var text = pdfDocument.Pages[i].GetText();
-        text = text.Normalize(NormalizationForm.FormKC);
+        var text = PdfTextExtractor.GetTextFromPage(reader, i, new LocationTextExtractionStrategy())
+            .Normalize(NormalizationForm.FormC);
         var pageTextBytes = Encoding.UTF8.GetBytes(text);
         var pageTextInBase64 = Convert.ToBase64String(pageTextBytes);
-
-        pages.Add(new Page(i + 1, bookId, pageTextInBase64));
+        
+        pages.Add(new Page(i, bookId, pageTextInBase64));
       }
 
       return pages;
