@@ -5,7 +5,8 @@
              xmlns:view="clr-namespace:Library.Client.View"
              DispatcherUnhandledException="App_OnDispatcherUnhandledException"
              Startup="App_OnStartup"
-             Exit="App_OnExit">
+             Exit="App_OnExit"
+             ShutdownMode="OnLastWindowClose">
     <Application.Resources>
         <DataTemplate DataType="{x:Type viewModel:SearchViewModel}">
             <view:SearchControl/>
