@@ -323,14 +323,13 @@ namespace Library.Utils
         _log.Debug($"Searching: {searchPhrase} in index: {PagesIndexName}");
         response = Client.Search<Page>(s => s.Index(Indices.Parse(PagesIndexName))
             .StoredFields(sf => sf.Field(f => f.BookId).Field(f => f.Number).Field(f => f.Attachment.Content))
-            .Query(q => q.SimpleQueryString(
-              sq => sq
+            .Query(q => q.SimpleQueryString(sq => sq
                   .Query(searchPhrase)
-                  .Fields(f => f.Field(p => p.Attachment.Content))))
+                  .Fields(f => f.Field(p => p.Attachment.Content))
+                  .Analyzer("my_russian_morphology")))
             .Sort(s => s
-                .Ascending(f => f
-                    .Number))
-            .Size(1000)
+                .Ascending(f => f.BookId))
+            .Size(10000)
             .Highlight(h => h
                 .Fields(f => f.Field(b => b.Attachment.Content))));
       }
