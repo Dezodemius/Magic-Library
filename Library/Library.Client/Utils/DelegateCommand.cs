@@ -43,14 +43,7 @@ namespace Library.Client.Utils
     /// <param name="parameter">Параметр команды.</param>
     public void Execute(object parameter)
     {
-      try
-      {
         ExecuteAction?.Invoke(parameter);
-      }
-      catch (Exception e)
-      {
-        Console.WriteLine(e);
-      }
     }
 
     /// <summary>
