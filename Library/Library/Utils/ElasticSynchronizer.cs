@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Library.Entity;
 using NLog;
@@ -33,7 +32,10 @@ namespace Library.Utils
         foreach (var book in booksOnlyOnDisk)
         {
           ElasticProvider.Instance.Index(book);
-          var bookPages = TextLayerExtractor.GetTextLayerWithPages($"{BookManager.Instance.BookShelfPath}/{book.Name}.pdf", book.Id);
+          var progress = 0.0;
+          var bookPages = TextLayerExtractor.GetTextLayerWithPages(
+            $"{BookManager.Instance.BookShelfPath}/{book.Name}.pdf", 
+            book.Id, d => progress = d);
           ElasticProvider.Instance.BulkIndex(bookPages);
         }
         Log.Info("Missing books have been indexed.");

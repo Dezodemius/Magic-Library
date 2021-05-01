@@ -122,7 +122,7 @@
         </Content>
       <Content Include="Properties\App.manifest" />
       <SplashScreen Include="splashscreen.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </SplashScreen>
     <Content Include="Library.ico">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

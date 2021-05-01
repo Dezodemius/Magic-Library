@@ -11,6 +11,8 @@
       <PackageReference Include="NEST" Version="7.7.1" />
       <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
       <PackageReference Include="NLog" Version="4.7.2" />
+      <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+      <PackageReference Include="Tesseract" Version="4.1.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -29,10 +31,27 @@
       </Compile>
     </ItemGroup>
     <ItemGroup>
-        <None Update="stopwords.txt" CopyToOutputDirectory="PreserveNewest"/>
+        <None Update="stopwords.txt" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
     <ItemGroup>
       <Reference Include="System.Net.Http" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove="eng.traineddata" />
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="tessdata\eng.traineddata">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="tessdata\pus.traineddata" />
+      <None Remove="tessdata\ukr.traineddata" />
+      <Content Include="tessdata\ukr.traineddata">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="tessdata\rus.traineddata" />
+      <Content Include="tessdata\rus.traineddata">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
     <Target Name="CopyNLogConfig" AfterTargets="AfterBuild">
         <Copy SourceFiles="NLog.config" DestinationFolder="$(OutDir)" />

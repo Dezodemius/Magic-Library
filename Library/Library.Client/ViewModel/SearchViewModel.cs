@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Threading;
 using Library.Client.Model;
 using Library.Client.Utils;
+using Library.Client.View;
 using Library.Entity;
 using Library.Utils;
 using Microsoft.Win32;
@@ -26,10 +29,30 @@ namespace Library.Client.ViewModel
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     /// <summary>
+    /// Задача на добавление книг в библиотеку.
+    /// </summary>
+    private static Task _addingTask;
+    
+    /// <summary>
     /// Имя окна.
     /// </summary>
-    public override string Name { get; } = "Поиск";
-    
+    public override string Name => "Поиск";
+
+    private double _progress;
+
+    public double Progress
+    {
+      get => _progress;
+      set
+      {
+        if (Math.Abs(_progress - value) < 1e-3)
+          return;
+
+        _progress = value;
+        OnPropertyChanged(nameof(Progress));
+      }
+    }
+
     /// <summary>
     /// Коллекция найденных книг.
     /// </summary>
@@ -82,8 +105,7 @@ namespace Library.Client.ViewModel
     /// <summary>
     /// Команда добавления книги.
     /// </summary>
-    public DelegateCommand AddBookCommand =>
-      _addBookCommand ??= new DelegateCommand(AddBook, AddBookCanExecute);
+    public DelegateCommand AddBookCommand => _addBookCommand ??= new DelegateCommand(AddBook, AddBookCanExecute);
 
     private DelegateCommand _getAllBooksCommand;
 
@@ -128,7 +150,9 @@ namespace Library.Client.ViewModel
     /// <returns>Признак того, что поиск может выполняться.</returns>
     private bool SearchCanExecute(object arg)
     {
-      return ElasticProvider.Instance.CheckElasticsearchConnection();
+      if (_addingTask == null)
+        return ElasticProvider.Instance.CheckElasticsearchConnection() && !string.IsNullOrEmpty(SearchPhrase);
+      return ElasticProvider.Instance.CheckElasticsearchConnection()  && !string.IsNullOrEmpty(SearchPhrase) && _addingTask.IsCompleted;
     }
 
     /// <summary>
@@ -186,14 +210,16 @@ namespace Library.Client.ViewModel
     /// <returns>True, если возможно.</returns>
     private static bool AddBookCanExecute(object arg)
     {
-      return ElasticProvider.Instance.CheckElasticsearchConnection();
+      if (_addingTask == null)
+        return ElasticProvider.Instance.CheckElasticsearchConnection();
+      return ElasticProvider.Instance.CheckElasticsearchConnection() && _addingTask.IsCompleted;
     }
 
     /// <summary>
     /// Добавить книгу.
     /// </summary>
-    /// <param name="obj">Объект.</param>
-    private void AddBook(object obj)
+    /// <param name="sender"></param>
+    private void AddBook(object sender)
     {
       UpdateMessageTextBox("Начало добавления книг");
       var openFileDialog = new OpenFileDialog
@@ -206,8 +232,18 @@ namespace Library.Client.ViewModel
       if (openFileDialog.ShowDialog() != true)
         return;
 
+      _addingTask = new Task(() => AddBooks(openFileDialog.FileNames));
+      _addingTask.Start();
+    }
+
+    /// <summary>
+    /// Добавить книги.
+    /// </summary>
+    /// <param name="fileNames">Список книг.</param>
+    private void AddBooks(IEnumerable<string> fileNames)
+    {
       var booksForIndexing = new List<Book>();
-      foreach (var pathToFile in openFileDialog.FileNames)
+      foreach (var pathToFile in fileNames)
       {
         var bookId = Guid.NewGuid();
         var book = new Book(bookId, Path.GetFileNameWithoutExtension(pathToFile));
@@ -216,19 +252,21 @@ namespace Library.Client.ViewModel
           AppendToMessageTextBox($"Книга с именем {book.Name} уже сушествует.");
           continue;
         }
-        BookManager.Instance.AddBook(pathToFile, bookId);
-
-        booksForIndexing.Add(book);
-        AppendToMessageTextBox($"{book.Name} успешно добавлена");
     
-        var pages = TextLayerExtractor.GetTextLayerWithPages(pathToFile, book.Id);
-        ElasticProvider.Instance.BulkIndex(pages);
+        BookManager.Instance.AddBook(pathToFile, bookId);
+    
+        booksForIndexing.Add(book);
         
-        this.FoundedBooks.Add(new BookWithPages(book, new List<float>()));
-      }
+        var pages = TextLayerExtractor.GetTextLayerWithPages(pathToFile, book.Id, x => Progress = 100 * x);
+        ElasticProvider.Instance.BulkIndex(pages);
 
+        App.Current.Dispatcher.Invoke(() => this.FoundedBooks.Add(new BookWithPages(book, new List<float>())));
+        AppendToMessageTextBox($"{book.Name} успешно добавлена");
+      }
+    
       ElasticProvider.Instance.BulkIndex(booksForIndexing);
       AppendToMessageTextBox("Добавление книг завершено");
+      Progress = 0.0;
     }
 
     /// <summary>
@@ -344,7 +382,7 @@ namespace Library.Client.ViewModel
         UpdateMessageTextBox($"Открыта страница с Highlights книги {book.Name}");
       }
     }
-
+    
     #endregion
   }
 }

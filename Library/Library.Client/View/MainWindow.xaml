@@ -6,10 +6,10 @@
         xmlns:local="clr-namespace:Library.Client.View"
         mc:Ignorable="d"
         Title="Library"
-        Width="640" Height="480"
+        Width="640" Height="510"
         MinWidth="440" MinHeight="280"
         WindowStartupLocation="CenterScreen">
-     <Window.Resources>
+    <Window.Resources>
         <local:IndexConverter x:Key="IndexConverter" />
         <local:PagesConverter x:Key="PagesConverter" />
     </Window.Resources>
@@ -17,15 +17,16 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="60"/>
-            <RowDefinition Height="140*"/>
-            <RowDefinition Height="35*" />
+            <RowDefinition Height="278*"/>
+            <RowDefinition Height="43*" />
+            <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="1"
               HorizontalAlignment="Stretch" 
               VerticalAlignment="Center" 
               Width="Auto"  
               Height="50"
-              Margin="1" >
+              Margin="1,5,0.6,5" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -58,15 +59,15 @@
         </Grid>
         <TextBox Grid.Row="0" 
                  Grid.Column="0" 
-                 Margin="10" 
+                 Margin="10,10,9.6,10" 
                  TextWrapping="Wrap" 
                  HorizontalAlignment="Stretch" 
                  VerticalAlignment="Center"
                  Height="20" 
                  Width="Auto" 
-                 Text="{Binding SearchPhrase, Mode=OneWayToSource}" />
+                 Text="{Binding SearchPhrase, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" />
         <ScrollViewer Grid.Row="2" 
-                      Margin="1" 
+                      Margin="1,1,0.6,1.6" 
                       HorizontalAlignment="Stretch" 
                       VerticalAlignment="Stretch" 
                       VerticalScrollBarVisibility="Auto" 
@@ -140,16 +141,24 @@
         </ScrollViewer>
         <ScrollViewer HorizontalAlignment="Stretch" 
                       Height="70" 
-                      Margin="1" 
-                      Grid.Row="3" 
+                      Margin="2,0,-0.4,7.8" 
+                      Grid.Row="2" 
                       VerticalAlignment="Bottom" 
-                      MinHeight="55">
+                      MinHeight="55" Grid.RowSpan="3">
             <TextBlock Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"  
-                       HorizontalAlignment="Stretch" 
-                       Margin="10" Grid.Row="3" 
+                       HorizontalAlignment="Stretch" Grid.Row="3" 
                        TextWrapping="Wrap" 
                        VerticalAlignment="Bottom" 
                        Height="50"/>
         </ScrollViewer>
+        <ProgressBar x:Name="ProgressBar"
+                     Grid.Row="4"
+                     Margin="1"
+                     Height="10"
+                     MinHeight="10"
+                     Width="Auto"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Bottom"
+                     Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay}"/>
     </Grid>
 </Window>
