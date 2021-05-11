@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using Library.Client.Model;
 using Library.Client.Utils;
 using Library.Entity;
@@ -241,7 +243,6 @@ namespace Library.Client.ViewModel
           throw new LibraryInnerException(caption);
         }
       });
-      _addingTask.Wait();
     }
     
     /// <summary>
@@ -265,8 +266,7 @@ namespace Library.Client.ViewModel
 
         booksForIndexing.Add(book);
 
-        var pages = TextLayerExtractor.GetTextLayerWithPages(pathToFile, book.Id, x => Progress += x * 100);
-
+        var pages = TextLayerExtractor.GetTextLayerWithPages(pathToFile, book.Id, UpdateProgress);
         ElasticProvider.Instance.BulkIndex(pages);
         BookManager.Instance.AddBook(pathToFile, bookId);
         AppendToMessageTextBox($"\"{book.Name}\" успешно добавлена");
@@ -275,6 +275,15 @@ namespace Library.Client.ViewModel
       ElasticProvider.Instance.BulkIndex(booksForIndexing);
       AppendToMessageTextBox("Добавление книг завершено");
       Progress = 0.0;
+    }
+
+    /// <summary>
+    /// Обновить прогресс.
+    /// </summary>
+    /// <param name="x">Величина обновления.</param>
+    private void UpdateProgress(double x)
+    {
+      Progress += x * 100;
     }
 
     /// <summary>

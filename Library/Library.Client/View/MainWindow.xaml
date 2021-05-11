@@ -165,6 +165,6 @@
                      Width="Auto"
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Bottom"
-                     Minimum="0" Maximum="100" Value="{Binding Progress, Mode=Default}"/>
+                     Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay}"/>
     </Grid>
 </Window>
