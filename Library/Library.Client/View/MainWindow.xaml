@@ -17,9 +17,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="60"/>
-            <RowDefinition Height="278*"/>
-            <RowDefinition Height="43*" />
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="304*"/>
+            <RowDefinition Height="51*" />
+            <RowDefinition Height="25*"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="1"
               HorizontalAlignment="Stretch" 
@@ -67,7 +67,7 @@
                  Width="Auto" 
                  Text="{Binding SearchPhrase, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" />
         <ScrollViewer Grid.Row="2" 
-                      Margin="1,1,0.6,1.6" 
+                      Margin="1,1,0.6,2" 
                       HorizontalAlignment="Stretch" 
                       VerticalAlignment="Stretch" 
                       VerticalScrollBarVisibility="Auto" 
@@ -140,25 +140,31 @@
             </ListView>
         </ScrollViewer>
         <ScrollViewer HorizontalAlignment="Stretch" 
-                      Height="70" 
-                      Margin="2,0,-0.4,7.8" 
-                      Grid.Row="2" 
-                      VerticalAlignment="Bottom" 
-                      MinHeight="55" Grid.RowSpan="3">
-            <TextBlock Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"  
-                       HorizontalAlignment="Stretch" Grid.Row="3" 
-                       TextWrapping="Wrap" 
-                       VerticalAlignment="Bottom" 
-                       Height="50"/>
+                      Height="55" 
+                      Margin="1" 
+                      Grid.Row="3" 
+                      VerticalAlignment="Top" 
+                      MinHeight="55" Grid.RowSpan="2"
+                      MaxHeight="70"
+                      CanContentScroll="True"
+                      VerticalScrollBarVisibility="Auto">
+            <TextBlock HorizontalAlignment="Stretch" 
+                       Height="50" 
+                       Margin="1" 
+                       Grid.Row="3" 
+                       VerticalAlignment="Top" 
+                       MinHeight="40" Grid.RowSpan="2"
+                       Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"  
+                       TextWrapping="Wrap" />
         </ScrollViewer>
         <ProgressBar x:Name="ProgressBar"
                      Grid.Row="4"
-                     Margin="1"
-                     Height="10"
+                     Margin="1,0,0.6,0.8"
+                     Height="20"
                      MinHeight="10"
                      Width="Auto"
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Bottom"
-                     Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay}"/>
+                     Minimum="0" Maximum="100" Value="{Binding Progress, Mode=Default}"/>
     </Grid>
 </Window>

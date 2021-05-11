@@ -45,11 +45,16 @@
       </Content>
       <None Remove="tessdata\pus.traineddata" />
       <None Remove="tessdata\ukr.traineddata" />
-      <Content Include="tessdata\ukr.traineddata">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
       <None Remove="tessdata\rus.traineddata" />
       <Content Include="tessdata\rus.traineddata">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="tessdata\fast\eng.traineddata" />
+      <Content Include="tessdata\fast\eng.traineddata">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="tessdata\fast\rus.traineddata" />
+      <Content Include="tessdata\fast\rus.traineddata">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

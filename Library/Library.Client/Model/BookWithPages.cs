@@ -18,16 +18,16 @@ namespace Library.Client.Model
 
     public BookWithPages(Guid id, string name, IList<float> pages)
     {
-      this.Id = id;
-      this.Name = name;
-      this.Pages = pages;
+      Id = id;
+      Name = name;
+      Pages = pages;
     }
 
     public BookWithPages(Book book, IList<float> pages)
     {
-      this.Id = book.Id;
-      this.Name = book.Name;
-      this.Pages = pages;
+      Id = book.Id;
+      Name = book.Name;
+      Pages = pages;
     }
 
     public BookWithPages()

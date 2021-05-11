@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Library.Entity;
-using Library.Utils;
 using Newtonsoft.Json;
 using NLog;
 
@@ -20,14 +19,14 @@ namespace Library
     /// Имя директории книжной полки.
     /// </summary>
     private const string BookShelfName = ".library";
-    
+
     /// <summary>
     /// Расширение файла данных книги.
     /// </summary>
     private const string BookDataExtension = ".json";
 
     #endregion
-    
+
     #region Поля и свойства
 
     private static BookManager _instance;
@@ -36,7 +35,7 @@ namespace Library
     /// Инстанс менеджера книг.
     /// </summary>
     public static BookManager Instance => _instance ??= new BookManager();
-    
+
     /// <summary>
     /// Путь к директории книжной полки.
     /// </summary>
@@ -45,8 +44,8 @@ namespace Library
     /// <summary>
     /// Логгер класса.
     /// </summary>
-    private static readonly Logger Log  = LogManager.GetCurrentClassLogger();
-    
+    private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
     #endregion
 
     #region Методы
@@ -80,25 +79,6 @@ namespace Library
     }
 
     /// <summary>
-    /// Сериализовать книгу в файл.
-    /// </summary>
-    /// <param name="bookPath">Путь к файлу для сериализации.</param>
-    /// <param name="bookId">Guid книги.</param>
-    private static void SerializeBook(string bookPath, Guid bookId)
-    {
-      var bookEntityForSerializing = new Book(bookId, Path.GetFileNameWithoutExtension(bookPath));
-
-      var serializedBookDestinationPath = Path.Combine((new FileInfo(bookPath)).DirectoryName ?? string.Empty,
-        Path.GetFileNameWithoutExtension(bookPath) + BookDataExtension);
-      
-      var serializer = new JsonSerializer();
-      using var streamWriter = new StreamWriter(serializedBookDestinationPath);
-      using var jsonWriter = new JsonTextWriter(streamWriter);
-      
-      serializer.Serialize(jsonWriter, bookEntityForSerializing);
-    }
-
-    /// <summary>
     /// Убрать книгу с книжной полки.
     /// </summary>
     /// <param name="bookName">Название книги.</param>
@@ -107,7 +87,7 @@ namespace Library
     {
       if (string.IsNullOrEmpty(bookName))
         return false;
-      
+
       var filePath = new FileInfo(Path.Combine(BookShelfPath.FullName, $"{bookName}.pdf"));
       if (BookShelfPath.GetFiles().Any(f => f.Name == filePath.Name))
       {
@@ -115,7 +95,7 @@ namespace Library
         File.Delete(Path.Combine(filePath.Directory?.ToString()!, $"{Path.GetFileNameWithoutExtension(filePath.Name)}.json"));
         return true;
       }
-      
+
       return false;
     }
 
@@ -195,7 +175,27 @@ namespace Library
     {
       return BookShelfPath.GetFiles("*.pdf").Any(f => Path.GetFileNameWithoutExtension(f.FullName) == bookName);
     }
-    
+
+    /// <summary>
+    /// Сериализовать книгу в файл.
+    /// </summary>
+    /// <param name="bookPath">Путь к файлу для сериализации.</param>
+    /// <param name="bookId">Guid книги.</param>
+    private static void SerializeBook(string bookPath, Guid bookId)
+    {
+      var bookEntityForSerializing = new Book(bookId, Path.GetFileNameWithoutExtension(bookPath));
+
+      var bookPathFileInfo = new FileInfo(bookPath).DirectoryName ?? string.Empty;
+      var serializedBookDestinationPath = Path.Combine(
+        bookPathFileInfo, Path.GetFileNameWithoutExtension(bookPath) + BookDataExtension);
+
+      var serializer = new JsonSerializer();
+      using var streamWriter = new StreamWriter(serializedBookDestinationPath);
+      using var jsonWriter = new JsonTextWriter(streamWriter);
+
+      serializer.Serialize(jsonWriter, bookEntityForSerializing);
+    }
+
     /// <summary>
     /// Убедиться в наличии директории.
     /// </summary>
@@ -216,7 +216,7 @@ namespace Library
     {
       var bookShelfPath = Path.Combine(Directory.GetCurrentDirectory(), BookShelfName);
       EnsureDirectory(bookShelfPath);
-      
+
       BookShelfPath = new DirectoryInfo(bookShelfPath)
       {
         Attributes = FileAttributes.Hidden | FileAttributes.Directory

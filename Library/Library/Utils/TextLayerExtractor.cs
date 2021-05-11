@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using iTextSharp.text.pdf.parser;
 using NLog;
 using Tesseract;
@@ -19,19 +22,11 @@ namespace Library.Utils
   public static class TextLayerExtractor
   {
     /// <summary>
-    /// Достаточный уровень доверия к распознанному тексту.
-    /// </summary>
-    private const double SufficientRecognitionConfidence = 0.5;
-    
-    /// <summary>
-    /// Список доступных языков для распознавания текста.
-    /// </summary>
-    private static readonly string[] AvailableLanguages = {"rus", "eng"};
-
-    /// <summary>
     /// Логгер класса.
     /// </summary>
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
+    private static readonly object Lock = new object();
 
     /// <summary>
     /// Получить список страниц с их текстом в base64.
@@ -44,27 +39,45 @@ namespace Library.Utils
     {
       BitMiracle.Docotic.LicenseManager.AddLicenseData("51QVA-4ECP3-YFGX0-51B4S-3GBOB");
       
-      var pages = new List<Page>();
+      var pages = new ConcurrentQueue<Page>();
       var reader = new PdfReader(pdfPath);
       var numberOfPages = reader.NumberOfPages;
-      for (var pageNumber = 1; pageNumber < numberOfPages; pageNumber++)
+      var exceptions = new ConcurrentQueue<Exception>();
+      
+      Parallel.For(1, numberOfPages + 1, new ParallelOptions
       {
-        var text = PdfTextExtractor.GetTextFromPage(reader, pageNumber, new LocationTextExtractionStrategy()).Normalize();
-        if (string.IsNullOrEmpty(text))
+          MaxDegreeOfParallelism = Environment.ProcessorCount * 4
+      },i =>
+      {
+        try
         {
-          using var pdfDocument = new PdfDocument(pdfPath);
-          var page = pdfDocument.Pages[pageNumber];
-          var recognizePageTexts = RecognizePageText(page);
+          string text;
+          lock (Lock)
+          {
+            text = PdfTextExtractor.GetTextFromPage(reader, i, new LocationTextExtractionStrategy()).Normalize();
+          }
+          if (string.IsNullOrEmpty(text))
+          {
+            using var pdfDocument = new PdfDocument(pdfPath);
+            var page = pdfDocument.Pages[i - 1];
+            page.Rotation = PdfRotation.None;
+            var recognizedPageText = RecognizePageText(page);
 
-          foreach (var pageText in recognizePageTexts)
-            pages.Add(new Page(pageNumber, bookId, GetStringInBase64(pageText.ToString())));
+            pages.Enqueue(new Page(i, bookId, GetStringInBase64(recognizedPageText)));
+          }
+          else
+            pages.Enqueue(new Page(i, bookId, GetStringInBase64(text.Trim())));
+
+          progressAction?.Invoke((double)1 / numberOfPages);
         }
-        else
-          pages.Add(new Page(pageNumber, bookId, GetStringInBase64(text)));
+        catch (Exception e)
+        {
+          exceptions.Enqueue(e);
+        }
+      });
 
-        progressAction((double)pageNumber / numberOfPages);
-      }
-
+      if (exceptions.Any())
+        throw new AggregateException(exceptions);
       return pages;
     }
     
@@ -84,50 +97,22 @@ namespace Library.Utils
     /// Распознать текст нечитаемого PDF-файла.
     /// </summary>
     /// <param name="page">Нечитаемая PDF-страница.</param>
-    /// <returns>Список вариантов распознанной страницы на разных языках.</returns>
-    private static IEnumerable<StringBuilder> RecognizePageText(PdfPage page)
+    /// <returns>Распознанный текст со страницы.</returns>
+    private static string RecognizePageText(PdfPage page)
     {
-      var recognizedPages = new List<StringBuilder>();
-      
       var options = PdfDrawOptions.Create();
       options.BackgroundColor = new PdfRgbColor(255, 255, 255);
-      options.HorizontalResolution = 300;
-      options.VerticalResolution = 300;
+      options.HorizontalResolution = 200;
+      options.VerticalResolution = 200;
 
-      // var pageImageName = $"{Path.GetTempFileName()}.png";
       using var memoryStream = new MemoryStream();
       page.Save(memoryStream, options);
-
-      foreach (var language in AvailableLanguages)
-      {
-        var recognizedPageText = RecognizePageTextForLanguage(memoryStream.GetBuffer(), language, out _);
-        recognizedPages.Add(recognizedPageText);
-      }
-      // File.Delete(pageImageName);
-      return recognizedPages;
-    }
-
-    /// <summary>
-    /// Распознать текст из не читаемого PDF.
-    /// </summary>
-    /// <param name="imageBytes">Путь к изображенияю страницы для распознавания.</param>
-    /// <param name="language">Язык, который нужно распознать.</param>
-    /// <param name="confidence">Доверие к результату распознавания.</param>
-    /// <returns>Текст.</returns>
-    private static StringBuilder RecognizePageTextForLanguage(byte[] imageBytes, string language, out double confidence)
-    {
-      var recognizedPages = new StringBuilder();
       
-      using var engine = new TesseractEngine("tessdata", language, EngineMode.Default);
-      using var img = Pix.LoadFromMemory(imageBytes);
-      using var recognizedRusPage = engine.Process(img);
-      
-      recognizedPages.Append(recognizedRusPage.GetText());
-      confidence = recognizedRusPage.GetMeanConfidence();
-      
-      Log.Debug($"Доверие к распознанному тексту на английском языке {confidence}");
+      using var engine = new TesseractEngine(@"tessdata\fast", "rus+eng", EngineMode.LstmOnly);
+      using var img = Pix.LoadFromMemory(memoryStream.GetBuffer());
+      using var recognizedPage = engine.Process(img);
 
-      return recognizedPages;
+      return recognizedPage.GetText();
     }
   }
 }

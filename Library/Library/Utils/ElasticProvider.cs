@@ -85,7 +85,7 @@ namespace Library.Utils
     /// <returns></returns>
     public bool CheckElasticsearchConnection()
     {
-      var pingResponse = Client.Ping();
+      var pingResponse = Client.PingAsync().Result;
       _log.Debug(pingResponse.ApiCall.Success);
       return pingResponse.ApiCall.Success;
     }
@@ -117,7 +117,7 @@ namespace Library.Utils
     {
       if (!Client.Indices.Exists(Indices.Parse(PagesIndexName)).Exists)
       {
-        var stopwords = this.GetStopwords();
+        var stopwords = GetStopwords();
         Client.Indices.Create(Indices.Index(PagesIndexName),
           i => i
             .Map<Page>(m => m
@@ -377,7 +377,7 @@ namespace Library.Utils
       _log.Debug($"Search all. Found {response.Documents.Count} documents.");
       return response.Documents;
     }
-    
+
     #endregion
 
     #region Удаление
@@ -399,7 +399,7 @@ namespace Library.Utils
       else
         _log.Debug("Bulk delete. All books deleted.");
     }
-    
+
     /// <summary>
     /// Удалить книгу из индекса.
     /// </summary>

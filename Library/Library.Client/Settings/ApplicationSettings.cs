@@ -29,7 +29,11 @@ namespace Library.Client.Settings
     /// Путь к логам приложения.
     /// </summary>
     internal static string LogFilename => GetSetting<string>("LOG_FILENAME", string.Empty);
-
+    
+    /// <summary>
+    /// Признак необходимости удалить сервис ES при старте.
+    /// </summary>
+    internal static bool NeedReinstallService => GetSetting<bool>("NEED_REINSTALL_SERVICE_ON_STARTUP", true);
     #endregion
 
     #region Методы

@@ -12,17 +12,17 @@ namespace Library.Entity
     /// Номер страницы.
     /// </summary>
     public int Number { get; }
-    
+
     /// <summary>
     /// ИД книги, к которой пренадлежит страница.
     /// </summary>
     public Guid BookId { get; }
-    
+
     /// <summary>
     /// Вложение страницы.
     /// </summary>
     public Attachment Attachment { get; set; }
-    
+
     /// <summary>
     /// Конструктор.
     /// </summary>

@@ -8,12 +8,12 @@ namespace Library.Entity
   public class Book
   {
     #region Свойства
-    
+
     /// <summary>
     /// Идентификатор книги.
     /// </summary>
     public Guid Id { get; set; }
-    
+
     /// <summary>
     /// Название книги.
     /// </summary>
@@ -29,7 +29,7 @@ namespace Library.Entity
     public Book()
     {
     }
-    
+
     /// <summary>
     /// Конструктор.
     /// </summary>

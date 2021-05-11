@@ -73,6 +73,7 @@
         <Compile Include="Utils\ElasticsearchServiceManager.cs" />
         <Compile Include="Utils\ViewService.cs" />
         <Compile Include="ViewModel\HighlightsViewModel.cs" />
+        <Compile Include="ViewModel\LibraryInnerException.cs" />
         <Compile Include="ViewModel\MainWindowViewModel.cs" />
         <Compile Include="ViewModel\SearchViewModel.cs" />
         <Compile Include="ViewModel\ViewModel.cs" />

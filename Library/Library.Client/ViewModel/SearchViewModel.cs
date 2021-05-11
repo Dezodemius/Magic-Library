@@ -4,15 +4,12 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 using Library.Client.Model;
 using Library.Client.Utils;
-using Library.Client.View;
 using Library.Entity;
 using Library.Utils;
 using Microsoft.Win32;
 using Nest;
-using NLog;
 
 namespace Library.Client.ViewModel
 {
@@ -24,15 +21,10 @@ namespace Library.Client.ViewModel
     #region Поля и свойства
 
     /// <summary>
-    /// Логгер.
-    /// </summary>
-    private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-
-    /// <summary>
     /// Задача на добавление книг в библиотеку.
     /// </summary>
     private static Task _addingTask;
-    
+
     /// <summary>
     /// Имя окна.
     /// </summary>
@@ -40,6 +32,9 @@ namespace Library.Client.ViewModel
 
     private double _progress;
 
+    /// <summary>
+    /// Прогресс добавления книг.
+    /// </summary>
     public double Progress
     {
       get => _progress;
@@ -64,7 +59,7 @@ namespace Library.Client.ViewModel
       var books = new ObservableCollection<BookWithPages>();
       foreach (var book in allBooks)
         books.Add(new BookWithPages(book, new List<float>()));
-      
+
       return books;
     }
 
@@ -152,7 +147,7 @@ namespace Library.Client.ViewModel
     {
       if (_addingTask == null)
         return ElasticProvider.Instance.CheckElasticsearchConnection() && !string.IsNullOrEmpty(SearchPhrase);
-      return ElasticProvider.Instance.CheckElasticsearchConnection()  && !string.IsNullOrEmpty(SearchPhrase) && _addingTask.IsCompleted;
+      return ElasticProvider.Instance.CheckElasticsearchConnection() && !string.IsNullOrEmpty(SearchPhrase) && _addingTask.IsCompleted;
     }
 
     /// <summary>
@@ -165,7 +160,7 @@ namespace Library.Client.ViewModel
       if (string.IsNullOrEmpty(SearchPhrase))
         return;
       var searchResponse = ElasticProvider.Instance.Search(SearchPhrase);
-      
+
       var currentBook = new BookWithPages();
       foreach (var hit in searchResponse.Hits)
       {
@@ -179,9 +174,11 @@ namespace Library.Client.ViewModel
           currentBook = new BookWithPages(book, new List<float>());
           FoundedBooks.Add(currentBook);
         }
+
         currentBook.Pages.Add(pageNumber);
-        currentBook.Highlights.Add(new HighlightWithPages {Highlight = hit.Highlight, Page = pageNumber});
+        currentBook.Highlights.Add(new HighlightWithPages { Highlight = hit.Highlight, Page = pageNumber });
       }
+
       UpdateMessageTextBox($"Найдено экземпляров: {FoundedBooks.Count}");
     }
 
@@ -208,7 +205,7 @@ namespace Library.Client.ViewModel
     /// </summary>
     /// <param name="arg">Аргумент.</param>
     /// <returns>True, если возможно.</returns>
-    private static bool AddBookCanExecute(object arg)
+    private bool AddBookCanExecute(object arg)
     {
       if (_addingTask == null)
         return ElasticProvider.Instance.CheckElasticsearchConnection();
@@ -218,7 +215,7 @@ namespace Library.Client.ViewModel
     /// <summary>
     /// Добавить книгу.
     /// </summary>
-    /// <param name="sender"></param>
+    /// <param name="sender">Отправитель.</param>
     private void AddBook(object sender)
     {
       UpdateMessageTextBox("Начало добавления книг");
@@ -232,10 +229,21 @@ namespace Library.Client.ViewModel
       if (openFileDialog.ShowDialog() != true)
         return;
 
-      _addingTask = new Task(() => AddBooks(openFileDialog.FileNames));
-      _addingTask.Start();
+      _addingTask = Task.Run(() =>
+      {
+        try
+        {
+          AddBooks(openFileDialog.FileNames);
+        }
+        catch (AggregateException ex)
+        {
+          var caption = string.Join(Environment.NewLine, ex.InnerExceptions.Select(e => e.Message));
+          throw new LibraryInnerException(caption);
+        }
+      });
+      _addingTask.Wait();
     }
-
+    
     /// <summary>
     /// Добавить книги.
     /// </summary>
@@ -249,21 +257,21 @@ namespace Library.Client.ViewModel
         var book = new Book(bookId, Path.GetFileNameWithoutExtension(pathToFile));
         if (BookManager.Instance.IsSameNameBookExisted(book.Name))
         {
-          AppendToMessageTextBox($"Книга с именем {book.Name} уже сушествует.");
+          AppendToMessageTextBox($"Книга с именем \"{book.Name}\" уже существует.");
           continue;
         }
-    
-        BookManager.Instance.AddBook(pathToFile, bookId);
-    
-        booksForIndexing.Add(book);
-        
-        var pages = TextLayerExtractor.GetTextLayerWithPages(pathToFile, book.Id, x => Progress = 100 * x);
-        ElasticProvider.Instance.BulkIndex(pages);
 
-        App.Current.Dispatcher.Invoke(() => this.FoundedBooks.Add(new BookWithPages(book, new List<float>())));
-        AppendToMessageTextBox($"{book.Name} успешно добавлена");
+        AppendToMessageTextBox($"Добавление \"{book.Name}\". . .");
+
+        booksForIndexing.Add(book);
+
+        var pages = TextLayerExtractor.GetTextLayerWithPages(pathToFile, book.Id, x => Progress += x * 100);
+
+        ElasticProvider.Instance.BulkIndex(pages);
+        BookManager.Instance.AddBook(pathToFile, bookId);
+        AppendToMessageTextBox($"\"{book.Name}\" успешно добавлена");
       }
-    
+
       ElasticProvider.Instance.BulkIndex(booksForIndexing);
       AppendToMessageTextBox("Добавление книг завершено");
       Progress = 0.0;
@@ -272,9 +280,9 @@ namespace Library.Client.ViewModel
     /// <summary>
     /// Возможность получить все книги.
     /// </summary>
-    /// <param name="arg"></param>
+    /// <param name="arg">Книга.</param>
     /// <returns>True, если возможно.</returns>
-    private static bool GetAllBooksCanExecute(object arg)
+    private bool GetAllBooksCanExecute(object arg)
     {
       return true;
     }
@@ -309,7 +317,8 @@ namespace Library.Client.ViewModel
     /// </summary>
     /// <param name="obj">Объект книги.</param>
     /// <remarks>Доступ из View взят отсюда:
-    /// https://stackoverflow.com/questions/11082162/context-menu-for-removing-items-in-listview.</remarks>
+    /// https://stackoverflow.com/questions/11082162/context-menu-for-removing-items-in-listview.
+    /// </remarks>
     private void DeleteBook(object obj)
     {
       if (obj is Book book)
@@ -323,16 +332,16 @@ namespace Library.Client.ViewModel
 
         AppendToMessageTextBox(messageText);
 
-        this.FoundedBooks.Remove((BookWithPages)book);
+        FoundedBooks.Remove((BookWithPages)book);
       }
     }
 
     /// <summary>
     /// Возможность открыть книгу.
     /// </summary>
-    /// <param name="arg"></param>
+    /// <param name="arg">Книга.</param>
     /// <returns>True, если возможно.</returns>
-    private static bool OpenBookCanExecute(object arg)
+    private bool OpenBookCanExecute(object arg)
     {
       if (arg is Book book)
         return BookManager.Instance.IsBookExisted(book);
@@ -352,13 +361,13 @@ namespace Library.Client.ViewModel
         UpdateMessageTextBox($"Открыта {book.Name}");
       }
     }
-    
+
     /// <summary>
     /// Возможность открыть Highlights книги.
     /// </summary>
-    /// <param name="arg"></param>
+    /// <param name="arg">Книга со страницами.</param>
     /// <returns>True, если возможно.</returns>
-    private static bool OpenBookHighlightsCanExecute(object arg)
+    private bool OpenBookHighlightsCanExecute(object arg)
     {
       if (arg is BookWithPages book)
         return BookManager.Instance.IsBookExisted(book) && book.Pages.Any() && book.Highlights.Any();
@@ -382,7 +391,7 @@ namespace Library.Client.ViewModel
         UpdateMessageTextBox($"Открыта страница с Highlights книги {book.Name}");
       }
     }
-    
+
     #endregion
   }
 }

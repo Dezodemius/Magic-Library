@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Library.Client.Settings;
 using Library.Client.Utils;
-using Library.Client.ViewModel;
 using Library.Utils;
 using NLog;
 using NLog.Layouts;
@@ -29,8 +27,8 @@ namespace Library.Client.View
     /// <summary>
     /// Пррозрачное окно.
     /// </summary>
-    private static Window transparentWindow;
-    
+    private static Window _transparentWindow;
+
     #endregion
 
     #region Обработчики событий
@@ -45,8 +43,8 @@ namespace Library.Client.View
       ElasticProvider.Instance.Initialize();
       ElasticSynchronizer.SynchronizeWithDisk();
 
-      transparentWindow.Close();
-      transparentWindow = null;
+      _transparentWindow.Close();
+      _transparentWindow = null;
       splash.Close(TimeSpan.Zero);
     }
 
@@ -59,11 +57,14 @@ namespace Library.Client.View
 
     private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-      var message = $"{e.Exception.Message}";
+      string message;
+      if (e.Exception is AggregateException)
+        message = $"{e.Exception.InnerException?.Message}";
+      else
+        message = e.Exception.Message;
       Log.Fatal($"{message}\n{e.Exception.StackTrace}");
-      var  messageBoxResult = MessageBox.Show(message, "Возникло исключение",
-        MessageBoxButton.OK, MessageBoxImage.Error);
-      
+      var messageBoxResult = MessageBox.Show(message, "Возникло исключение", MessageBoxButton.OK, MessageBoxImage.Error);
+
       e.Handled = false;
 
       if (messageBoxResult == MessageBoxResult.OK)
@@ -77,10 +78,12 @@ namespace Library.Client.View
     /// <summary>
     /// Показать прозрачное окно для нормального вывода возникшего при старте приложения исключения.
     /// </summary>
-    /// <seealso cref="https://social.msdn.microsoft.com/Forums/vstudio/en-US/116bcd83-93bf-42f3-9bfe-da9e7de37546/messagebox-closes-immediately-in-dispatcherunhandledexception-handler?forum=wpf"/>
+    /// <remarks>
+    /// https://social.msdn.microsoft.com/Forums/vstudio/en-US/116bcd83-93bf-42f3-9bfe-da9e7de37546/messagebox-closes-immediately-in-dispatcherunhandledexception-handler?forum=wpf/>
+    /// </remarks>
     private static void ShowTransparentWindow()
     {
-      transparentWindow = new Window
+      _transparentWindow = new Window
       {
           AllowsTransparency = true,
           Background = System.Windows.Media.Brushes.Transparent,
@@ -92,9 +95,9 @@ namespace Library.Client.View
           ShowInTaskbar = false
       };
 
-      transparentWindow.Show();
+      _transparentWindow.Show();
     }
-    
+
     /// <summary>
     /// Выполнить инициализацию приложения перед стартом.
     /// </summary>
@@ -102,6 +105,13 @@ namespace Library.Client.View
     {
       if (!string.IsNullOrEmpty(ApplicationSettings.LogFilename))
         ConfigureLogs();
+
+      if (ApplicationSettings.NeedReinstallService)
+      {
+        ElasticsearchServiceManager.Instance.ReinstallElasticService();
+        WaitRunPendingElasticsearch();
+      }
+
       if (ApplicationSettings.NeedRunElasticOnStartup)
       {
         ElasticsearchServiceManager.Instance.EnsureElasticsearchServiceRun();
