@@ -158,7 +158,9 @@ namespace Library.Client.View
     /// <param name="exitCode">Код завершения.</param>
     private static void CloseApplication(int exitCode)
     {
-      Current.Shutdown(exitCode);
+      if (Current != null)
+        Current.Shutdown(exitCode);
+      Environment.Exit(exitCode);
     }
 
     #endregion

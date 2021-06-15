@@ -37,7 +37,7 @@ namespace Library.Utils
     /// <returns>Список страниц.</returns>
     public static IEnumerable<Page> GetTextLayerWithPages(string pdfPath, Guid bookId, Action<double> progressAction)
     {
-      BitMiracle.Docotic.LicenseManager.AddLicenseData("51QVA-4ECP3-YFGX0-51B4S-3GBOB");
+      BitMiracle.Docotic.LicenseManager.AddLicenseData("5P66M-TH5YU-KMPKP-ZU4U3-SSBP0");
       
       var pages = new ConcurrentQueue<Page>();
       var reader = new PdfReader(pdfPath);

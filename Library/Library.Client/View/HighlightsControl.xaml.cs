@@ -28,9 +28,10 @@ namespace Library.Client.View
   {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      if (value is IReadOnlyDictionary<string, IReadOnlyCollection<string>>  highlightWithPages)
-        return highlightWithPages["attachment.content"].ToList().First();
-      return string.Empty;
+      var text = string.Empty;
+      if (value is IReadOnlyDictionary<string, IReadOnlyCollection<string>> highlightWithPages)
+        text = highlightWithPages["attachment.content"].ToList().First();
+      return text;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
